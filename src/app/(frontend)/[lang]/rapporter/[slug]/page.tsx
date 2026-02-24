@@ -157,7 +157,7 @@ export default async function Rapport({ params: paramsPromise }: Args) {
       <Container maxWidth="xxl">
         <div className="flex flex-col lg:flex-row">
           {tocData.length > 0 && <TableOfContents tocData={tocData} />}
-          <article className="shrink min-w-0 pb-8">
+          <article className="shrink min-w-0 pb-8 lg:pt-8">
             <SelectionProvider>
               <RichText
                 lang={lang === "en" ? "en" : rapport.norskType}
