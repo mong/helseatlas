@@ -78,7 +78,7 @@ export const Carousel = ({
           onClick={(i) => setActiveComp(i)}
         />
       )}
-      <Box style={{ width: "95%", minHeight: "540px" }} key={activeComp}>
+      <Box style={{ width: "95%", marginBottom: "1rem" }} key={activeComp}>
         {chartElems[activeComp]}
       </Box>
       <div style={{ alignSelf: "flex-start" }}>
