@@ -16,7 +16,7 @@ const nextConfig = {
         }
       }),
     ],
-    unoptimized: true,
+    // unoptimized: true,
     qualities: [25, 50, 75, 100],
     // localPatterns: [
     //   {
