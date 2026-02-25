@@ -2,7 +2,6 @@
 
 import type { StaticImageData } from 'next/image'
 
-import { cn } from '@/utilities/ui'
 import NextImage from 'next/image'
 import React from 'react'
 
@@ -28,10 +27,6 @@ const placeholderBlur =
 export const ImageMedia: React.FC<MediaProps> = (props) => {
   const {
     alt: altFromProps,
-    fill,
-    pictureClassName,
-    imgClassName,
-    priority,
     resource,
     size: sizeFromProps,
     src: srcFromProps,
@@ -61,21 +56,19 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
       .map(([, value]) => `(max-width: ${value}px) ${value * 2}w`)
       .join(', ')
 
+
   return (
-    <picture className={cn(pictureClassName)}>
+    <picture>
       <NextImage
         alt={alt || ''}
-        className={cn(imgClassName)}
-        fill={fill}
-        height={!fill ? height : undefined}
+        height={height}
         placeholder="blur"
         blurDataURL={placeholderBlur}
-        priority={priority}
         quality={75}
-        loading={"eager"}
+        loading={"lazy"}
         sizes={sizes}
         src={src}
-        width={!fill ? width : undefined}
+        width={width}
       />
     </picture>
   )

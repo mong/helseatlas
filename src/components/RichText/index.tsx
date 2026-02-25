@@ -104,13 +104,7 @@ const jsxConverters: (lang: "en" | "nb" | "nn", author: "SKDE" | "Helse Førde")
         factBox: ({ node }: { node: SerializedBlockNode<FactBoxBlockProps> }) => <FactBoxBlock {...node.fields} />,
         table: ({ node }: { node: SerializedBlockNode<TableBlockProps> }) => <TableBlock {...node.fields} />,
         rawHTML: ({ node }: { node: SerializedBlockNode<RawHTMLBlockProps> }) => <RawHTMLBlock {...node.fields} />,
-        mediaBlock: ({ node }: { node: SerializedBlockNode<MediaBlockProps> }) => (
-          <MediaBlock
-            imgClassName="m-0"
-            {...node.fields}
-            enableGutter={false}
-          />
-        ),
+        mediaBlock: ({ node }: { node: SerializedBlockNode<MediaBlockProps> }) => <MediaBlock {...node.fields} />,
       },
     })
   };
