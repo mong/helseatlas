@@ -141,13 +141,13 @@ export default async function Rapport({ params: paramsPromise }: Args) {
         <div className="flex flex-col md:flex-row gap-4 md:gap-16 mt-10">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
-              <p className="text-sm">Forfatter</p>
+              <p className="text-sm">{dict.general.author}</p>
               <p className="m-0">{rapport.author}</p>
             </div>
           </div>
           {rapport.publishedAt && (
             <div className="flex flex-col gap-1">
-              <p className="text-sm">Publisert</p>
+              <p className="text-sm">{dict.general.published}</p>
               {makeDateElem(rapport.publishedAt, lang)}
             </div>
           )}

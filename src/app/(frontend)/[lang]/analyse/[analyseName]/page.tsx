@@ -144,7 +144,7 @@ export default async function AnalysePage(props: {
             />
           )}
           <Typography variant="body2">
-            {dict.analysebox.updated}{" "}
+            {dict.general.updated}{" "}
             {makeDateElem(analyse.publishedAt || analyse.createdAt, lang)}
           </Typography>
         </Stack>

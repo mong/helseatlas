@@ -20,7 +20,6 @@
     "absolute_number": "Absolutt antall",
     "show_norway": "Vis Norge",
     "info": "Om analysen",
-    "updated": "Oppdatert",
     "open_new_tab": "Åpne analyse i ny fane",
     "download_data": "Last ned data",
     "download_data_text": "Alle dataene brukt i figurene for denne analysen kan lastes ned i JSON-format.",
@@ -48,6 +47,9 @@
     "health_atlas": "Helseatlas",
     "updated_health_atlas": "Oppdaterte helseatlas",
     "reports": "Rapporter",
+    "published": "Publisert",
+    "updated": "Oppdatert",
+    "author": "Forfatter",
     "metadata_keywords": "geografisk variasjon, SKDE, helseatlas, oppdaterte helseatlas"
   },
   "frontpage": {

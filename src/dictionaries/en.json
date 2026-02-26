@@ -20,7 +20,6 @@
     "absolute_number": "Absolute number",
     "show_norway": "Show Norway",
     "info": "About the analysis",
-    "updated": "Updated",
     "open_new_tab": "Open analysis in new tab",
     "download_data": "Download data",
     "download_data_text": "All of the data used in the charts for this analysis can be downloaded as a JSON file.",
@@ -48,6 +47,9 @@
     "health_atlas": "Health Atlas",
     "updated_health_atlas": "Updated Health Atlas",
     "reports": "Reports",
+    "published": "Published",
+    "updated": "Updated",
+    "author": "Author",
     "metadata_keywords": "geographical variation, SKDE, Health Atlas, Updated Health Atlas"
   },
   "frontpage": {
