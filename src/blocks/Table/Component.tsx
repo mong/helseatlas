@@ -11,7 +11,7 @@ export const TableBlock: React.FC<TableBlockProps> = async ({
 
   return (
     <figure className="mx-auto max-w-[80%]">
-      <div className="leading-none [&_td]:p-2! [&_p]:m-0 text-base overflow-scroll">
+      <div className="leading-none [&_td]:p-2! [&_p]:m-0 text-base overflow-auto">
         <RichText
           data={table}
           enableGutter={false}
