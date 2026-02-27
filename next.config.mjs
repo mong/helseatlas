@@ -42,6 +42,11 @@ const nextConfig = {
         destination: '/.auth/login/cognito',
         permanent: true,
       },
+      {
+        source: '/admin/login',
+        destination: '/.auth/login/cognito',
+        permanent: true,
+      },
       { // Denne redirecten er lagt til som en fiks for problemer i FNSP. Problemet er at vi vil ha et
         // forsidekort med link til samlesiden for alle helseatlas, uten å få med banner-bildet til skde.no/helseatlas/
         source: '/helseatlas-forside/',
@@ -60,6 +65,16 @@ const nextConfig = {
           // { type: 'host', value: 'www.helsesatlas.no' },
         ],
         destination: 'https://skde.no/helseatlas',
+        permanent: false,
+      },
+      {
+        source: "/helseatlas/v2/:slug", // Fikser redirect for URL-er fra gammel CMS-løsning
+        destination: "/no/rapporter/:slug",
+        permanent: false,
+      },
+      {
+        source: "/helseatlas/en/v2/:slug",
+        destination: "/en/rapporter/:slug",
         permanent: false,
       },
     ]
