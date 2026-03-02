@@ -31,8 +31,8 @@ const settings = [
 
 export default function AdminBar({ preview }: AdminBarProps) {
   const [anchorElem, setAnchorElem] = React.useState<null | HTMLElement>(null);
-  const router = useRouter();
-  const pathName = usePathname();
+  //const router = useRouter();
+  //const pathName = usePathname();
 
   const [user, setUser] = React.useState<{ name: string, email: string } | null>(null);
   // React.useEffect(() => {
@@ -64,7 +64,7 @@ export default function AdminBar({ preview }: AdminBarProps) {
                 {user?.name} / {user?.email}
               </Typography>
             </Box>
-            {preview &&
+            {/* {preview &&
               pathName.match(/\/(en|no)\/(rapporter|analyse)\/.+/) && (
                 <Box sx={{ flexGrow: 0, marginX: 5 }}>
                   <Button
@@ -78,7 +78,7 @@ export default function AdminBar({ preview }: AdminBarProps) {
                     Forlat forhåndsvisning
                   </Button>
                 </Box>
-              )}
+              )} */}
             <Box sx={{ flexGrow: 0 }}>
               <Tooltip title="Open settings">
                 <IconButton
