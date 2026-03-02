@@ -35,7 +35,7 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
   let width: number | undefined;
   let height: number | undefined;
   let alt = altFromProps;
-  let loading = loadingFromProps || 'lazy';
+  const loading = loadingFromProps || 'lazy';
   let src: StaticImageData | string = srcFromProps || '';
 
   if (!src && resource && typeof resource === 'object') {
