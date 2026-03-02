@@ -35,21 +35,21 @@ export default function AdminBar({ preview }: AdminBarProps) {
   const pathName = usePathname();
 
   const [user, setUser] = React.useState<{ name: string, email: string } | null>(null);
-  React.useEffect(() => {
-    const fetchMe = async () => {
-      try {
-        const meRequest = await fetch(`http://localhost:3000/api/users/me`, {
-          credentials: 'include',
-          method: 'get'
-        });
-        const meResponse = await meRequest.json();
-        setUser(meResponse.user);
-      } catch (e) {
-        console.log("Failed to fetch user info", e);
-      }
-    }
-    void fetchMe();
-  }, []);
+  // React.useEffect(() => {
+  //   const fetchMe = async () => {
+  //     try {
+  //       const meRequest = await fetch(`http://localhost:3000/api/users/me`, {
+  //         credentials: 'include',
+  //         method: 'get'
+  //       });
+  //       const meResponse = await meRequest.json();
+  //       setUser(meResponse.user);
+  //     } catch (e) {
+  //       console.log("Failed to fetch user info", e);
+  //     }
+  //   }
+  //   void fetchMe();
+  // }, []);
 
   return user && (
     <Box sx={{ flexGrow: 1 }}>
