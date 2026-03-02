@@ -52,7 +52,7 @@ export const CollectionArchive: React.FC<Props> = async (props) => {
                 >
                   <div className="max-h-[350px] overflow-hidden">
                     {!doc.bilde && <div className="">No image</div>}
-                    {doc.bilde && typeof doc.bilde !== 'string' && <Media resource={doc.bilde} size="33vw" />}
+                    {doc.bilde && typeof doc.bilde !== 'string' && <Media loading={index < 2 ? 'eager' : 'lazy'} resource={doc.bilde} size="33vw" />}
                   </div>
                   <div className="py-5 px-6">
                     <span className="text-base">

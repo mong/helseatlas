@@ -29,23 +29,25 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
     resource,
     size: sizeFromProps,
     src: srcFromProps,
-  } = props
+    loading: loadingFromProps,
+  } = props;
 
-  let width: number | undefined
-  let height: number | undefined
-  let alt = altFromProps
-  let src: StaticImageData | string = srcFromProps || ''
+  let width: number | undefined;
+  let height: number | undefined;
+  let alt = altFromProps;
+  let loading = loadingFromProps || 'lazy';
+  let src: StaticImageData | string = srcFromProps || '';
 
   if (!src && resource && typeof resource === 'object') {
-    const { alt: altFromResource, height: fullHeight, url, width: fullWidth } = resource
+    const { alt: altFromResource, height: fullHeight, url, width: fullWidth } = resource;
 
-    width = fullWidth!
-    height = fullHeight!
-    alt = altFromResource || ''
+    width = fullWidth!;
+    height = fullHeight!;
+    alt = altFromResource || '';
 
-    const cacheTag = resource.updatedAt
+    const cacheTag = resource.updatedAt;
 
-    src = getMediaUrl(url, cacheTag)
+    src = getMediaUrl(url, cacheTag);
   }
 
   // NOTE: this is used by the browser to determine which image to download at different screen sizes
@@ -53,7 +55,7 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
     ? sizeFromProps
     : Object.entries(breakpoints)
       .map(([, value]) => `(max-width: ${value}px) ${value * 2}w`)
-      .join(', ')
+      .join(', ');
 
 
   return (
@@ -64,11 +66,11 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
         placeholder="blur"
         blurDataURL={SKDEBlur}
         quality={75}
-        loading={"lazy"}
+        loading={loading}
         sizes={sizes}
         src={src}
         width={width}
       />
     </picture>
-  )
+  );
 }
