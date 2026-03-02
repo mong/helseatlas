@@ -21,6 +21,8 @@ import React from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 type AdminBarProps = {
+  email: string;
+  userName: string;
   preview: boolean;
 };
 
@@ -29,29 +31,12 @@ const settings = [
   { tekst: "Logg ut", url: "/.auth/logout" },
 ];
 
-export default function AdminBar({ preview }: AdminBarProps) {
+export default function AdminBar({ email, userName, preview }: AdminBarProps) {
   const [anchorElem, setAnchorElem] = React.useState<null | HTMLElement>(null);
-  //const router = useRouter();
-  //const pathName = usePathname();
+  const router = useRouter();
+  const pathName = usePathname();
 
-  const [user, setUser] = React.useState<{ name: string, email: string } | null>(null);
-  // React.useEffect(() => {
-  //   const fetchMe = async () => {
-  //     try {
-  //       const meRequest = await fetch(`http://localhost:3000/api/users/me`, {
-  //         credentials: 'include',
-  //         method: 'get'
-  //       });
-  //       const meResponse = await meRequest.json();
-  //       setUser(meResponse.user);
-  //     } catch (e) {
-  //       console.log("Failed to fetch user info", e);
-  //     }
-  //   }
-  //   void fetchMe();
-  // }, []);
-
-  return user && (
+  return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static" sx={{ margin: 0 }}>
         <Container maxWidth="xxl" disableGutters={false} sx={{ padding: 0 }}>
@@ -61,10 +46,10 @@ export default function AdminBar({ preview }: AdminBarProps) {
                 <VerifiedUserIcon sx={{ color: "#000" }} />
               </Avatar>
               <Typography variant="h6" color="inherit" component="div">
-                {user?.name} / {user?.email}
+                {userName} / {email}
               </Typography>
             </Box>
-            {/* {preview &&
+            {preview &&
               pathName.match(/\/(en|no)\/(rapporter|analyse)\/.+/) && (
                 <Box sx={{ flexGrow: 0, marginX: 5 }}>
                   <Button
@@ -78,7 +63,7 @@ export default function AdminBar({ preview }: AdminBarProps) {
                     Forlat forhåndsvisning
                   </Button>
                 </Box>
-              )} */}
+              )}
             <Box sx={{ flexGrow: 0 }}>
               <Tooltip title="Open settings">
                 <IconButton
