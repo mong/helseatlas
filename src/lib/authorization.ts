@@ -1,13 +1,13 @@
 import "server-only";
-// import { headers } from "next/headers";
+import { headers } from "next/headers";
 
 export async function loginCredentials() {
   if (process.env.NODE_ENV === "development") {
     return { userName: "Example user", email: "example@example.test" };
   }
+  const headerList = await headers();
   return false;
 
-  // const headerList = await headers();
   // const email = headerList.get("x-ms-client-principal-name");
   // const authInfo = headerList.get("x-ms-client-principal");
 
