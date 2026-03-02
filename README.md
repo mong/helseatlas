@@ -1,36 +1,29 @@
-# Health Atlas Updated Analyses
+# Helseatlas
 
-This is the repository for the web app showing updated health atlas analyses.
+Dette er repositoriet for web-appen som viser sidene til helseatlas.
 
-The development version of the web app is continuously deployed from the main branch to Microsoft Azure, and the site can be found at https://analyser.skde.no.
+Utviklingsversjonen av web-appen blir kontinuerlig distribuert fra main-grenen til Microsoft Azure, og nettsiden finnes på https://analyser.skde.no.
 
-## MongoDB
+## Redirects
 
-The app uses MongoDB.
+For å støtte internasjonalisering (i18n), blir sidene automatisk omdirigert fra roten `/` til `/no/`. Dette gjøres i middleware.tsx. For å legge til unntak fra denne regelen, se regex-mønsteret i middleware-koden.
 
-Remember to add an environment variable to a file `.env.local`, located locally in the project root directory. Add the environment variable MONGO_URI and the connection string.
+## Kjør lokalt
 
-(This file is not commited and pushed to GitHub.)
-
-## Language redirects
-
-To support internationalization (i8n), the pages are automatically redirected from the root `/` to `/no/`. This is done in middleware.tsx. To add exceptions to this rule, see the regex pattern in the middleware code.
-
-## Running locally
-
-First, run the development server:
+Først kjører du utviklingsserveren:
 
 ```bash
-yarn dev
+pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Åpne [http://localhost:3000](http://localhost:3000) i nettleseren din for å se resultatet.
 
 ## Docker
 
-You can build a local docker-image of the web app.
+Du kan bygge et lokalt docker-image av web-appen.
 
 ```
 docker build . -t oppdaterte-analyser/nextjs
 docker run -p 3000:3000 oppdaterte-analyser/nextjs
 ```
+
