@@ -19,7 +19,7 @@ export default async function RootLayout(props: {
   children: React.ReactNode;
   params: Promise<{ lang: string }>;
 }) {
-  const { isEnabled } = await draftMode()
+  // const { isEnabled } = await draftMode()
   const { lang } = await props.params;
 
   return (
@@ -30,7 +30,7 @@ export default async function RootLayout(props: {
           <ThemeProvider theme={skdeTheme}>
             <CssBaseline />
 
-            <AdminBar preview={isEnabled} />
+            {/* <AdminBar preview={isEnabled} /> */}
             <Box
               sx={{
                 height: "100vh",
