@@ -3,9 +3,6 @@ import type { CollectionConfig } from "payload";
 import { authenticated } from "../../access/authenticated";
 
 export async function loginCredentials(headers: Headers) {
-  /*
-  More or less a copy of{ loginCredentials } from "@/lib/authorization"; (the import "server-only" makes Payload crash)
-  */
   if (process.env.NODE_ENV === "development") {
     return { userName: "Example user", email: "example@example.test" };
   }

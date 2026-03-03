@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { headers } from "next/headers";
 
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
@@ -6,14 +7,12 @@ import { draftMode } from 'next/headers'
 import React, { cache } from 'react'
 import RichText, { headerNodeToPlaintext } from '@/components/RichText'
 
-import { headers } from "next/headers";
-
-
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import { Container } from '@mui/material'
 import { SelectionProvider } from '@/lib/SelectionContext'
 import { notFound } from 'next/navigation'
 import { Lang } from '@/types'
+
 import { BreadCrumbStop } from '@/components/Header/SkdeBreadcrumbs'
 import { getDictionary } from '@/lib/dictionaries'
 import Header from '@/components/Header'

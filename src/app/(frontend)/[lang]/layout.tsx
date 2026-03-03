@@ -5,7 +5,6 @@ import { Box, CssBaseline } from "@mui/material";
 import skdeTheme from "@/themes/SkdeTheme";
 import Footer from "@/components/Footer";
 import MatomoTracker from "../MatomoTracker";
-import { loginCredentials } from "@/lib/authorization";
 import AdminBar from "@/components/AdminBar";
 import { draftMode } from "next/headers";
 
@@ -23,8 +22,6 @@ export default async function RootLayout(props: {
   const { isEnabled } = await draftMode()
   const { lang } = await props.params;
 
-  // const credentials = await loginCredentials();
-
   return (
     <html lang={lang}>
       <MatomoTracker />
@@ -33,7 +30,7 @@ export default async function RootLayout(props: {
           <ThemeProvider theme={skdeTheme}>
             <CssBaseline />
 
-            {/* {credentials && <AdminBar {...credentials} preview={isEnabled} />} */}
+            <AdminBar preview={isEnabled} />
             <Box
               sx={{
                 height: "100vh",

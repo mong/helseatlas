@@ -21,8 +21,6 @@ import React from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 type AdminBarProps = {
-  email: string;
-  userName: string;
   preview: boolean;
 };
 
@@ -31,12 +29,25 @@ const settings = [
   { tekst: "Logg ut", url: "/.auth/logout" },
 ];
 
-export default function AdminBar({ email, userName, preview }: AdminBarProps) {
+export default function AdminBar({ preview }: AdminBarProps) {
   const [anchorElem, setAnchorElem] = React.useState<null | HTMLElement>(null);
   const router = useRouter();
   const pathName = usePathname();
 
-  return (
+  const [user, setUser] = React.useState<{ name: string, email: string } | null>(null);
+  React.useEffect(() => {
+    const fetchMe = async () => {
+      const meRequest = await fetch(`/api/users/me`, {
+        credentials: 'include',
+        method: 'get'
+      });
+      const meResponse = await meRequest.json();
+      setUser(meResponse.user);
+    };
+    void fetchMe();
+  }, []);
+
+  return user && (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static" sx={{ margin: 0 }}>
         <Container maxWidth="xxl" disableGutters={false} sx={{ padding: 0 }}>
@@ -46,7 +57,7 @@ export default function AdminBar({ email, userName, preview }: AdminBarProps) {
                 <VerifiedUserIcon sx={{ color: "#000" }} />
               </Avatar>
               <Typography variant="h6" color="inherit" component="div">
-                {userName} / {email}
+                {user?.name} / {user?.email}
               </Typography>
             </Box>
             {preview &&
