@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-// import { headers } from "next/headers";
 
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
@@ -85,10 +84,7 @@ type Args = {
 export default async function Rapport({ params: paramsPromise }: Args) {
   const { isEnabled: draft } = await draftMode();
 
-  // const _result = await headers();
-  /*
-    await headers() er med kun for å unngå en mystisk byggefeil
-  */
+
 
   const { slug = '', lang } = await paramsPromise;
   const rapport = await queryRapportBySlug({ slug, lang });

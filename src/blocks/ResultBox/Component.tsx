@@ -1,4 +1,5 @@
 import type { ResultBoxBlock as ResultBoxBlockProps } from "src/payload-types";
+import { headers } from "next/headers";
 
 import React, { cache } from "react";
 import RichText from "@/components/RichText";
@@ -22,6 +23,12 @@ export const ResultBoxBlock: React.FC<ResultBoxBlockProps & { lang?: "en" | "nb"
   media,
   blockName,
 }) => {
+
+  const _result = await headers();
+  /*
+    await headers() er med kun for å unngå en mystisk byggefeil
+  */
+
   if (!media || !(typeof media === "object") || !media.url || !media.filename)
     return;
   if (!kart || !(typeof kart === "object") || !kart.filename) return;
