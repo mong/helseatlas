@@ -1,5 +1,5 @@
 import type { ResultBoxBlock as ResultBoxBlockProps } from "src/payload-types";
-import { headers } from "next/headers";
+// import { headers } from "next/headers";
 
 import React, { cache } from "react";
 import RichText from "@/components/RichText";
@@ -24,7 +24,7 @@ export const ResultBoxBlock: React.FC<ResultBoxBlockProps & { lang?: "en" | "nb"
   blockName,
 }) => {
 
-  const _result = await headers();
+  // const _result = await headers();
   /*
     await headers() er med kun for å unngå en mystisk byggefeil
   */
