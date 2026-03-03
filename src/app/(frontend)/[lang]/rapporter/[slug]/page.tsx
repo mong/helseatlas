@@ -4,15 +4,16 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { draftMode } from 'next/headers'
 import React, { cache } from 'react'
-import RichText, { headerNodeToPlaintext, sanitizeID } from '@/components/RichText'
+import RichText, { headerNodeToPlaintext } from '@/components/RichText'
+
+import { headers } from "next/headers";
+
 
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import { Container } from '@mui/material'
 import { SelectionProvider } from '@/lib/SelectionContext'
 import { notFound } from 'next/navigation'
 import { Lang } from '@/types'
-import TagList from '@/components/TagList'
-import { formatDateTime } from '@/utilities/formatDateTime'
 import { BreadCrumbStop } from '@/components/Header/SkdeBreadcrumbs'
 import { getDictionary } from '@/lib/dictionaries'
 import Header from '@/components/Header'
@@ -84,6 +85,11 @@ type Args = {
 
 export default async function Rapport({ params: paramsPromise }: Args) {
   const { isEnabled: draft } = await draftMode();
+
+  const _result = await headers();
+  /*
+    await headers() er med kun for å unngå en mystisk byggefeil
+  */
 
   const { slug = '', lang } = await paramsPromise;
   const rapport = await queryRapportBySlug({ slug, lang });

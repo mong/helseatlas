@@ -23,7 +23,7 @@ export default async function RootLayout(props: {
   const { isEnabled } = await draftMode()
   const { lang } = await props.params;
 
-  const credentials = await loginCredentials();
+  // const credentials = await loginCredentials();
 
   return (
     <html lang={lang}>
