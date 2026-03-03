@@ -35,12 +35,10 @@ export const ResultBoxBlock: React.FC<ResultBoxBlockProps & { lang?: "en" | "nb"
 
   const url = getServerSideURL();
 
-  console.log("URL::::", url)
-
   // Promise.all to read both files concurrently
   const [mapData, data] = await Promise.all([
-    getMap(`http://localhost:3000/api/datafiler/file/${kart.filename}`),
-    fetch(`http://localhost:3000/api/datafiler/file/${media.filename}`, { cache: "force-cache", next: { tags: ["datafil"] } }).then((res) => res.json()),
+    getMap(`${url}/api/datafiler/file/${kart.filename}`),
+    fetch(`${url}/api/datafiler/file/${media.filename}`, { cache: "force-cache", next: { tags: ["datafil"] } }).then((res) => res.json()),
   ]);
 
 
