@@ -1,4 +1,4 @@
-import { PayloadRequest, CollectionSlug } from 'payload'
+import { PayloadRequest } from 'payload'
 
 const collectionPrefixMap = {
   rapporter: (locale: string) =>

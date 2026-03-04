@@ -44,20 +44,20 @@ jobs:
             "preview_secret=${{ secrets.PREVIEW_SECRET }}"
             "postgres_uri=${{ secrets.POSTGRES_URI }}"
 
-  # deploy:
-  #   runs-on: ubuntu-latest
-  #   needs: build
-  #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
-  #   environment:
-  #     name: production
-  #     url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    environment:
+      name: production
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
-  #   steps:
-  #     - name: Deploy to Azure Web App
-  #       id: deploy-to-webapp
-  #       uses: azure/webapps-deploy@v3
-  #       with:
-  #         app-name: ${{ env.AZURE_WEBAPP_NAME }}
-  #         publish-profile: ${{ secrets.PUBLISH_PROFILE_DOCKER }}
-  #         images: "${{ env.REGISTRY }}/${{ github.repository }}:${{ github.sha }}"
+    steps:
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.PUBLISH_PROFILE_DOCKER }}
+          images: "${{ env.REGISTRY }}/${{ github.repository }}:${{ github.sha }}"

@@ -1,12 +1,9 @@
 import type { ResultBoxBlock as ResultBoxBlockProps } from "src/payload-types";
-// import { headers } from "next/headers";
 
 import React, { cache } from "react";
 import RichText from "@/components/RichText";
 
 import { ResultBox } from ".";
-import { getServerSideURL } from "@/utilities/getURL";
-
 
 const getMap = cache(async (path: string) =>
   fetch(path, { cache: "force-cache", next: { tags: ["datafil"] } }).then((res) => res.json())
@@ -24,20 +21,12 @@ export const ResultBoxBlock: React.FC<ResultBoxBlockProps & { lang?: "en" | "nb"
   blockName,
 }) => {
 
-  // const _result = await headers();
-  /*
-    await headers() er med kun for å unngå en mystisk byggefeil
-  */
-
   if (!media || !(typeof media === "object") || !media.url || !media.filename)
     return;
   if (!kart || !(typeof kart === "object") || !kart.filename) return;
 
-  //const url = getServerSideURL();
-  const url = "https://payloadfiles.blob.core.windows.net/payloadcms"
+  const url = "https://payloadfiles.blob.core.windows.net/payloadcms";
 
-
-  console.log(`${url}/${media.filename}`)
   // Promise.all to read both files concurrently
   const [mapData, data] = await Promise.all([
     getMap(`${url}/${kart.filename}`),
