@@ -44,8 +44,8 @@ jobs:
             "preview_secret=${{ secrets.PREVIEW_SECRET }}"
             "postgres_uri=${{ secrets.POSTGRES_URI }}"
           build-args: |
-            "AZURE_STORAGE_ACCOUNT_BASEURL=test"
-            "AZURE_STORAGE_CONTAINER_NAME=test2"
+            "AZURE_STORAGE_ACCOUNT_BASEURL=${{ env.AZURE_STORAGE_ACCOUNT_BASEURL }}"
+            "AZURE_STORAGE_CONTAINER_NAME=${{ secrets.AZURE_STORAGE_CONTAINER_NAME }}"
 
   deploy:
     runs-on: ubuntu-latest
