@@ -25,12 +25,12 @@ export const ResultBoxBlock: React.FC<ResultBoxBlockProps & { lang?: "en" | "nb"
     return;
   if (!kart || !(typeof kart === "object") || !kart.filename) return;
 
-  const blobUrl= `${process.env.AZURE_STORAGE_ACCOUNT_BASEURL}${process.env.AZURE_STORAGE_CONTAINER_NAME}`
+  const url = "https://payloadfiles.blob.core.windows.net/payloadcms";
 
   // Promise.all to read both files concurrently
   const [mapData, data] = await Promise.all([
-    getMap(`${blobUrl}/${kart.filename}`),
-    fetch(`${blobUrl}/${media.filename}`, { cache: "force-cache", next: { tags: ["datafil"] } }).then((res) => res.json()),
+    getMap(`${url}/${kart.filename}`),
+    fetch(`${url}/${media.filename}`, { cache: "force-cache", next: { tags: ["datafil"] } }).then((res) => res.json()),
   ]);
 
 
