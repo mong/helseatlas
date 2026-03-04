@@ -33,12 +33,15 @@ export const ResultBoxBlock: React.FC<ResultBoxBlockProps & { lang?: "en" | "nb"
     return;
   if (!kart || !(typeof kart === "object") || !kart.filename) return;
 
-  const url = getServerSideURL();
+  //const url = getServerSideURL();
+  const url = "https://payloadfiles.blob.core.windows.net/payloadcms"
 
+
+  console.log(`${url}/${media.filename}`)
   // Promise.all to read both files concurrently
   const [mapData, data] = await Promise.all([
-    getMap(`${url}/api/datafiler/file/${kart.filename}`),
-    fetch(`${url}/api/datafiler/file/${media.filename}`, { cache: "force-cache", next: { tags: ["datafil"] } }).then((res) => res.json()),
+    getMap(`${url}/${kart.filename}`),
+    fetch(`${url}/${media.filename}`, { cache: "force-cache", next: { tags: ["datafil"] } }).then((res) => res.json()),
   ]);
 
 
