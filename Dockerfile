@@ -30,7 +30,10 @@ COPY . .
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED 1
 
+ARG AZURE_STORAGE_ACCOUNT_BASEURL "https://payloadfiles.blob.core.windows.net/"
+ARG AZURE_STORAGE_CONTAINER_NAME "payloadcms"
 RUN echo "Testing build args: ${AZURE_STORAGE_ACCOUNT_BASEURL}, ${AZURE_STORAGE_CONTAINER_NAME}"
+
 
 RUN \
     --mount=type=secret,id=mongo_uri,env=MONGO_URI \
