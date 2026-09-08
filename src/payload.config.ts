@@ -3,7 +3,6 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { postgresAdapter } from "@payloadcms/db-postgres";
-import { mongooseAdapter } from "@payloadcms/db-mongodb";
 import { azureStorage } from '@payloadcms/storage-azure'
 
 import { buildConfig } from "payload";
@@ -40,9 +39,7 @@ export default buildConfig({
   // Whichever Database Adapter you're using should go here
   // Mongoose is shown as an example, but you can also use Postgres
   indexSortableFields: true,
-  db: process.env.DEVELOPMENT_MONGO_URI ? mongooseAdapter({
-    url: process.env.DEVELOPMENT_MONGO_URI,
-  }) : postgresAdapter({
+  db: postgresAdapter({
     pool: {
       connectionString: process.env.POSTGRES_URI || "",
     },
