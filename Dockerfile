@@ -2,6 +2,10 @@
 
 FROM node:24-alpine AS base
 
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
 # Enable corepack so pnpm is available in all stages
 RUN corepack enable pnpm
 
@@ -17,13 +21,9 @@ COPY package.json yarn.lock* package-lock.json* .npmrc pnpm-lock.yaml* pnpm-work
 RUN --mount=type=secret,id=node_auth_token,env=NODE_AUTH_TOKEN \
     pnpm config set "//npm.pkg.github.com/:_authToken" "${NODE_AUTH_TOKEN}"
 
-RUN \
-    if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-    elif [ -f package-lock.json ]; then npm ci; \
-    elif [ -f pnpm-lock.yaml ]; then pnpm i --frozen-lockfile; \
-    else echo "Lockfile not found." && exit 1; \
-    fi
-
+# Mount the pnpm store cache dynamically
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    pnpm install --frozen-lockfile
 
 # Rebuild the source code only when needed
 FROM base AS builder
