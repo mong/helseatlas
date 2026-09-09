@@ -30,7 +30,6 @@ COPY . .
 # ENV NEXT_TELEMETRY_DISABLED 1
 
 ARG NEXT_PUBLIC_SERVER_URL="https://analyser.skde.no"
-RUN echo "NEXT_PUBLIC_SERVER_URL: $NEXT_PUBLIC_SERVER_URL"
 
 RUN \
     --mount=type=secret,id=mongo_uri,env=MONGO_URI \
