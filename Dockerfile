@@ -11,19 +11,12 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
-COPY package.json yarn.lock* package-lock.json* .npmrc pnpm-lock.yaml* pnpm-workspace.yaml ./
+COPY package.json .npmrc pnpm-lock.yaml pnpm-workspace.yaml ./
 
 RUN --mount=type=secret,id=node_auth_token,env=NODE_AUTH_TOKEN \
     pnpm config set "//npm.pkg.github.com/:_authToken" "${NODE_AUTH_TOKEN}"
 
-RUN \
-    if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-    elif [ -f package-lock.json ]; then npm ci; \
-    elif [ -f pnpm-lock.yaml ]; then pnpm i --frozen-lockfile; \
-    else echo "Lockfile not found." && exit 1; \
-    fi
-
+RUN  pnpm i --frozen-lockfile
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -44,11 +37,7 @@ RUN \
     --mount=type=secret,id=payload_secret,env=PAYLOAD_SECRET \
     --mount=type=secret,id=preview_secret,env=PREVIEW_SECRET \
     --mount=type=secret,id=postgres_uri,env=POSTGRES_URI \
-    if [ -f yarn.lock ]; then yarn run build; \
-    elif [ -f package-lock.json ]; then npm run build; \
-    elif [ -f pnpm-lock.yaml ]; then pnpm run build; \
-    else echo "Lockfile not found." && exit 1; \
-    fi
+    pnpm run build
 
 # Production image, copy all the files and run next
 FROM base AS runner
