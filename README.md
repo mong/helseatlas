@@ -19,7 +19,7 @@ pnpm dev
 Du kan bygge et lokalt docker-image av web-appen.
 
 ```
-docker build . -t helseatlas
-docker run -p 3000:3000 helseatlas
+docker build --secret id=node_auth_token,env=NODE_AUTH_TOKEN --secret id=payload_secret,env=PAYLOAD_SECRET --secret id=preview_secret,env=PREVIEW_SECRET --secret id=postgres_uri,env=POSTGRES_URI -t helseatlas .
+docker run -p 3000:3000 --env-file .env.local helseatlas
 ```
 

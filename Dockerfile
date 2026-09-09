@@ -32,7 +32,6 @@ COPY . .
 ARG NEXT_PUBLIC_SERVER_URL="https://analyser.skde.no"
 
 RUN \
-    --mount=type=secret,id=mongo_uri,env=MONGO_URI \
     --mount=type=secret,id=payload_secret,env=PAYLOAD_SECRET \
     --mount=type=secret,id=preview_secret,env=PREVIEW_SECRET \
     --mount=type=secret,id=postgres_uri,env=POSTGRES_URI \
