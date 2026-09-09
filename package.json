@@ -8,13 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "prepare": "husky",
     "generate:types": "PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:types",
     "generate:importmap": "PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:importmap"
-  },
-  "lint-staged": {
-    "*.ts": "eslint --cache --fix",
-    "*.{ts,tsx,js,css,md}": "prettier --write"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
@@ -77,9 +72,6 @@
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.7",
     "eslint": "10.10.0",
-    "eslint-config-next": "16.3.4",
-    "eslint-config-prettier": "10.1.8",
-    "husky": "9.1.7",
     "typescript": "7.0.2",
     "typescript-eslint": "8.69.0"
   },
