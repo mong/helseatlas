@@ -1,1 +1,0 @@
-prefer doublequotes, always use TypeScript, use Next.js app router, prefer server side components where possible, use await/async paradigm where suitable, mainly use MUI components for UI, use yarn instead of npm
