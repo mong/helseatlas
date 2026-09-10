@@ -2,23 +2,16 @@
 
 import React, { JSX, PropsWithChildren } from "react";
 import {
-  Select,
-  FormControl,
-  MenuItem,
-  InputLabel,
   Box,
   Typography,
   IconButton,
   FormControlLabel,
   Switch,
   Slider,
-  Zoom,
   Tab,
   Paper,
   Stack,
   styled,
-  Tooltip,
-  Menu,
   Snackbar,
   Slide,
 } from "@mui/material";
@@ -33,9 +26,8 @@ import PauseIcon from "@mui/icons-material/Pause";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import CloseIcon from "@mui/icons-material/Close";
 
-import { ToggleButtonGroup, ToggleButton, Dropdown } from "@mong/material-ui"
+import { ToggleButtonGroup, ToggleButton, Dropdown, SplitButton } from "@mong/material-ui"
 
-import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import { saveAs } from "file-saver";
 import html2canvas from "html2canvas";
 
@@ -54,6 +46,7 @@ import {
 } from "@/lib/helpers";
 import AnalyseDemography from "./AnalyseDemography";
 import { Analyser } from "@/payload-types";
+import downloadJSON from "@/lib/downloadJSON";
 
 const BACKGROUND_COLOR = "white";
 
@@ -114,16 +107,42 @@ type YearSelectorProps = {
   setYear: (year: number) => void;
   dict: { [k: string]: { [k: string]: string } };
   speed: number;
+  className?: string;
 };
 
+function YearSelectorDropdown({
+  years,
+  year,
+  setYear,
+  dict,
+  className
+}: YearSelectorProps) {
+  return (
+    <div className={className}>
+      <Dropdown
+        items={{
+          groups: [{
+            items: years.toReversed().map((y) => (
+              { label: y.toString(), value: y.toString() }
+            ))
+          }]
+        }}
+        onChange={(e) => setYear(Number(e.target.value))}
+        placeholder={dict.analysebox.choose_year}
+        value={year.toString()}
+      />
+    </div>
+  );
+}
 
-function YearSelector({
+function YearSelectorSlider({
   years,
   lastYear,
   year,
   setYear,
   dict,
   speed,
+  className
 }: YearSelectorProps) {
   const [animating, setAnimating] = React.useState(false);
   const animatingRef = React.useRef(false);
@@ -132,264 +151,133 @@ function YearSelector({
   }, [animating]);
 
   return (
-    <>
-      <div className="block sm:hidden">
-        <Dropdown
-          items={{
-            groups: [{
-              items: years.toReversed().map((y) => (
-                { label: y.toString(), value: y.toString() }
-              ))
-            }]
-          }}
-          onChange={(e) => setYear(Number(e.target.value))}
-          placeholder={dict.analysebox.choose_year}
-          value={year.toString()}
-        />
-      </div>
-      <div className="hidden sm:block basis-full">
-        <Stack direction="row">
-          <Box>
-            {animating ? (
-              <IconButton onClick={() => setAnimating(false)}>
-                <PauseIcon />
-              </IconButton>
-            ) : (
-              <IconButton
-                onClick={() => {
-                  setAnimating(true);
-                  let currentYear =
-                    lastYear === year ? Math.min(...(years as number[])) - 1 : year;
-                  (function loop() {
-                    setTimeout(
-                      () => {
-                        if (currentYear < lastYear && animatingRef.current) {
-                          currentYear++;
-                          setYear(currentYear);
-                          loop();
-                        } else {
-                          setAnimating(false);
-                        }
-                      },
-                      speed,
-                    );
-                  })();
-                }}
-              >
-                <PlayArrowIcon />
-              </IconButton>
-            )}
-          </Box>
-          <Box sx={{ flexGrow: 1, marginX: 2, marginRight: 4 }}>
-            <Slider
-              track={false}
-              value={year}
-              step={1}
-              min={Math.min(...(years as number[]))}
-              max={lastYear}
-              onChange={(_, value) => setYear(value as number)}
-              valueLabelFormat={(value) =>
-                value === lastYear + 1
-                  ? dict.analysebox.all_years
-                  : value.toString()
-              }
-              valueLabelDisplay="auto"
-              marks={years
-                .map((year) => ({
-                  value: year as number,
-                  label: year.toString(),
-                }))
-                .concat({
-                  value: lastYear + 1,
-                  label: dict.analysebox.all_years,
-                })}
-              sx={{
-                "@media (max-width: 600px)": {
-                  "& .MuiSlider-markLabel": {
-                    fontSize: "0.75rem",
-                  },
-                },
+    <div className={className}>
+      <Stack direction="row">
+        <Box>
+          {animating ? (
+            <IconButton onClick={() => setAnimating(false)}>
+              <PauseIcon />
+            </IconButton>
+          ) : (
+            <IconButton
+              onClick={() => {
+                setAnimating(true);
+                let currentYear =
+                  lastYear === year ? Math.min(...(years as number[])) - 1 : year;
+                (function loop() {
+                  setTimeout(
+                    () => {
+                      if (currentYear < lastYear && animatingRef.current) {
+                        currentYear++;
+                        setYear(currentYear);
+                        loop();
+                      } else {
+                        setAnimating(false);
+                      }
+                    },
+                    speed,
+                  );
+                })();
               }}
-            />
-          </Box>
-        </Stack>
-      </div>
-    </>
+            >
+              <PlayArrowIcon />
+            </IconButton>
+          )}
+        </Box>
+        <Box sx={{ flexGrow: 1, marginX: 2, marginRight: 4 }}>
+          <Slider
+            track={false}
+            value={year}
+            step={1}
+            min={Math.min(...(years as number[]))}
+            max={lastYear}
+            onChange={(_, value) => setYear(value as number)}
+            valueLabelFormat={(value) =>
+              value === lastYear + 1
+                ? dict.analysebox.all_years
+                : value.toString()
+            }
+            valueLabelDisplay="auto"
+            marks={years
+              .map((year) => ({
+                value: year as number,
+                label: year.toString(),
+              }))
+              .concat({
+                value: lastYear + 1,
+                label: dict.analysebox.all_years,
+              })}
+            sx={{
+              "@media (max-width: 600px)": {
+                "& .MuiSlider-markLabel": {
+                  fontSize: "0.75rem",
+                },
+              },
+            }}
+          />
+        </Box>
+      </Stack>
+    </div>
   );
 }
 
 type ScreenshotBoxProps = {
   analyse: Analyser;
-  dict: { [k: string]: { [k: string]: string } };
-  filename: string;
   description: JSX.Element;
+  graphRef: React.RefObject<HTMLDivElement | null>;
 };
 
 function ScreenshotBox({
   children,
   analyse,
-  dict,
-  filename,
-  description
+  description,
+  graphRef,
 }: PropsWithChildren<ScreenshotBoxProps>) {
 
-  const getCanvas = async () => {
-    if (graphRef.current) {
-      return await html2canvas(graphRef.current, {
-        onclone: (_, elem) => {
-          Array.from(elem.querySelectorAll("*")).forEach((e) => {
-            const existingStyle = e.getAttribute("style") || "";
-            e.setAttribute(
-              "style",
-              `${existingStyle}; font-family: sans-serif`,
-            );
-          });
-        },
-      });
-    }
-    return Promise.reject(new Error("No ref to graph"));
-  };
-
-  const graphRef = React.useRef<null | HTMLDivElement>(null);
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-  const [openSnackbar, setOpenSnackbar] = React.useState(false);
-
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    event.stopPropagation();
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = (event: React.MouseEvent<HTMLElement>) => {
-    event.stopPropagation();
-    setAnchorEl(null);
-  };
-
   return (
-    <div className="sticky px-0 md:px-8">
-      <Tooltip title={dict.analysebox.copy_graph_tooltip}>
-        <IconButton
-          aria-label="screenshot"
-          size="large"
-          sx={{
-            position: "absolute",
-            right: 10,
-            top: 10,
-            zIndex: 2,
-            color: "rgba(0, 0, 0, 0.2)",
-            "&:hover": { color: "rgba(0, 0, 0, 0.6)" },
-            displayPrint: "none",
-          }}
-          aria-controls={open ? "screenshot-meny" : undefined}
-          aria-expanded={open ? "true" : undefined}
-          aria-haspopup="true"
-          onClick={handleClick}
-        >
-          <PhotoCameraIcon />
-        </IconButton>
-      </Tooltip>
-      <Menu
-        id="screenshot-meny"
-        transformOrigin={{ horizontal: "right", vertical: "top" }}
-        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
+    <div className="px-0 md:px-8" ref={graphRef}>
+      <Box
+        sx={{
+          width: "100%",
+          height: "80vw",
+          maxHeight: "700px",
+          minHeight: "370px",
+          marginTop: 0,
+          position: "sticky",
+        }}
       >
-        <MenuItem
-          onClick={(e) => {
-            getCanvas().then((canvas) =>
-              canvas.toBlob(
-                (blob) =>
-                  blob &&
-                  navigator.clipboard
-                    .write([
-                      new ClipboardItem({
-                        "image/png": blob,
-                      }),
-                    ])
-                    .then(() => setOpenSnackbar(true)),
-              ),
-            );
-            handleClose(e);
-          }}
-        >
-          {dict.analysebox.copy_graph}
-        </MenuItem>
-
-        <MenuItem
-          onClick={(e) => {
-            getCanvas().then((canvas) =>
-              canvas.toBlob((blob) => blob && saveAs(blob, filename)),
-            );
-            handleClose(e);
-          }}
-        >
-          {dict.analysebox.download_graph}
-        </MenuItem>
-      </Menu>
-      <Box ref={graphRef}>
         <Box
           sx={{
-            width: "100%",
-            height: "80vw",
-            maxHeight: "700px",
-            minHeight: "370px",
-            marginTop: 0,
-            position: "sticky",
+            position: "absolute",
+            right: 0,
+            bottom: 0,
           }}
         >
           <Box
+            component="img"
+            alt={`${analyse.author} logo`}
+            src={analyse.author === "SKDE" ? "/img/logo-skde-graa.svg" : "/img/helse-forde-graa.svg"}
             sx={{
+              width: "15vw",
+              maxWidth: analyse.author === "SKDE" ? 100 : 150,
               position: "absolute",
-              right: 0,
-              bottom: 0,
+              bottom: 55,
+              right: 30,
+              printColorAdjust: "exact",
+              "@media print": { bottom: 110 },
             }}
-          >
-            <Box
-              component="img"
-              alt={`${analyse.author} logo`}
-              src={analyse.author === "SKDE" ? "/img/logo-skde-graa.svg" : "/img/helse-forde-graa.svg"}
-              sx={{
-                width: "15vw",
-                maxWidth: analyse.author === "SKDE" ? 100 : 150,
-                position: "absolute",
-                bottom: 55,
-                right: 30,
-                printColorAdjust: "exact",
-                "@media print": { bottom: 110 },
-              }}
-            />
-          </Box>
-          {children}
+          />
         </Box>
-        <Box sx={{
-          textAlign: "center",
-          padding: 2,
-          paddingBottom: 3,
-          "@media print": { padding: 0, paddingBottom: 3 },
-        }}>
-          {description}
-        </Box>
+        {children}
       </Box>
-
-      <Snackbar
-        open={openSnackbar}
-        autoHideDuration={4000}
-        onClose={() => setOpenSnackbar(false)}
-        slots={{ transition: Slide }}
-        message={dict.analysebox.copy_graph_snackbar_message}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        action={
-          <IconButton
-            size="small"
-            aria-label="close"
-            color="inherit"
-            onClick={() => setOpenSnackbar(false)}
-          >
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        }
-      />
+      <Box sx={{
+        textAlign: "center",
+        padding: 2,
+        paddingBottom: 3,
+        "@media print": { padding: 0, paddingBottom: 3 },
+      }}>
+        {description}
+      </Box>
     </div>
   );
 }
@@ -668,6 +556,72 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
     </div>
   );
 
+  const getCanvas = async () => {
+    if (graphRef.current) {
+      return await html2canvas(graphRef.current, {
+        onclone: (_, elem) => {
+          Array.from(elem.querySelectorAll("*")).forEach((e) => {
+            const existingStyle = e.getAttribute("style") || "";
+            e.setAttribute(
+              "style",
+              `${existingStyle}; font-family: sans-serif`,
+            );
+          });
+        },
+      });
+    }
+    return Promise.reject(new Error("No ref to graph"));
+  };
+
+  const [openSnackbar, setOpenSnackbar] = React.useState(false);
+  const graphRef = React.useRef<null | HTMLDivElement>(null);
+
+  const lastNed = (
+    <SplitButton
+      label={dict.analysebox.download}
+      onClick={(option) => {
+        switch (option) {
+          case dict.analysebox.copy_graph:
+            getCanvas().then((canvas) =>
+              canvas.toBlob(
+                (blob) =>
+                  blob &&
+                  navigator.clipboard
+                    .write([
+                      new ClipboardItem({
+                        "image/png": blob,
+                      }),
+                    ])
+                    .then(() => setOpenSnackbar(true)),
+              ),
+            );
+            break;
+          case dict.analysebox.download_graph:
+            getCanvas().then((canvas) =>
+              canvas.toBlob((blob) => blob && saveAs(blob,
+                mainTab === "demografi"
+                  ? `${analyse.data.name}_demografi.png`
+                  : analyseTab === "enkeltår"
+                    ? `${analyse.data.name}_${currentView.title[lang].toLowerCase().replace(" ", "_")}_${year}.png`
+                    : `${analyse.data.name}_tidstrend.png`
+              )),
+            );
+            break;
+          case dict.analysebox.download_data:
+            downloadJSON(analyse.data);
+            break;
+        }
+      }}
+      options={[
+        dict.analysebox.copy_graph,
+        dict.analysebox.download_graph,
+        dict.analysebox.download_data,
+      ]}
+      steps="one-step"
+    />
+  );
+
+
   return (
     <Box sx={{ width: "100%", typography: "body1" }}>
       <TabContext value={mainTab}>
@@ -721,48 +675,65 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
                 </MyTabList>
               </Box>
               <TabPanel value="enkeltår" sx={{ paddingX: 0, paddingBottom: 0 }}>
-                <div className="px-4 sm:px-8 flex flex-wrap gap-4 mb-4">
-                  <div className="w-45 sm:w-55 md:w-62.5">
-                    <Dropdown
-                      removeAll={dict.analysebox.remove_choice}
-                      items={{
-                        groups: [{
-                          items:
-                            analyse.data.views
-                              .filter(
-                                (v) =>
-                                  v.type === "standard" &&
-                                  v.name !== "total" &&
-                                  ["begge", aggregering].includes(v.aggregering))
-                              .map((view) => (
-                                { label: view.title[lang], value: view.name }))
-                        }]
-                      }}
-                      onChange={(e) => {
-                        setViewName(
-                          e.target.value === ""
-                            ? "total"
-                            : e.target.value as string,
-                        );
-                      }}
-                      placeholder={dict.analysebox.choose_focus_area}
-                      value={viewName === "total" ? "" : viewName}
-                    />
+                <div className="px-4 sm:px-8">
+                  <div className="flex gap-4">
+                    <div className="flex flex-wrap gap-4 gap-y-2 mb-4">
+                      <div className="w-45 sm:w-55 md:w-62.5">
+                        <Dropdown
+                          removeAll={dict.analysebox.remove_choice}
+                          items={{
+                            groups: [{
+                              items:
+                                analyse.data.views
+                                  .filter(
+                                    (v) =>
+                                      v.type === "standard" &&
+                                      v.name !== "total" &&
+                                      ["begge", aggregering].includes(v.aggregering))
+                                  .map((view) => (
+                                    { label: view.title[lang], value: view.name }))
+                            }]
+                          }}
+                          onChange={(e) => {
+                            setViewName(
+                              e.target.value === ""
+                                ? "total"
+                                : e.target.value as string,
+                            );
+                          }}
+                          placeholder={dict.analysebox.choose_focus_area}
+                          value={viewName === "total" ? "" : viewName}
+                        />
+
+                      </div>
+                      <YearSelectorDropdown
+                        years={years as number[]}
+                        lastYear={lastYear}
+                        year={year}
+                        setYear={setYear}
+                        dict={dict}
+                        speed={600}
+                        className="block sm:hidden"
+                      />
+                    </div>
+                    <div className="ml-auto shrink-0">
+                      {lastNed}
+                    </div>
                   </div>
-                  <YearSelector
+                  <YearSelectorSlider
                     years={years as number[]}
                     lastYear={lastYear}
                     year={year}
                     setYear={setYear}
                     dict={dict}
                     speed={600}
+                    className="hidden sm:block"
                   />
                 </div>
                 <div >
                   <ScreenshotBox
+                    graphRef={graphRef}
                     analyse={analyse}
-                    dict={dict}
-                    filename={`${analyse.data.name}_${currentView.title[lang].toLowerCase().replace(" ", "_")}_${year}.png`}
                     description={getDescription(analyse.data, lang, verdiType, aggregering, undefined, nynorsk)}
                   >
                     <AnalyseBarChart
@@ -811,40 +782,44 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
                 </div>
               </TabPanel>
               <TabPanel value="tidstrend" sx={{ paddingX: 0, paddingBottom: 0 }}>
-                <div className="px-4 sm:px-8 flex flex-row gap-4 flex-wrap">
-                  <VariableSelector
-                    analyse={analyse.data}
-                    views={analyse.data.views
-                      .filter((v) =>
-                        ["begge", aggregering].includes(v.aggregering),
-                      )
-                      .slice(1)}
-                    dict={dict}
-                    lang={lang}
-                    variable={tidstrendVariable}
-                    onClick={(v) => setTidstrendVariable(v)}
-                  />
-                  {verdiType === "n" && (
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          checked={showNorway}
-                          onChange={() => setShowNorway(!showNorway)}
-                        />
-                      }
-                      label={
-                        <Typography variant="body2" sx={{ display: "inline" }}>
-                          {dict.analysebox.show_norway}
-                        </Typography>
-                      }
+                <div className="flex gap-4 px-4 sm:px-8">
+                  <div className="flex flex-row gap-4 flex-wrap">
+                    <VariableSelector
+                      analyse={analyse.data}
+                      views={analyse.data.views
+                        .filter((v) =>
+                          ["begge", aggregering].includes(v.aggregering),
+                        )
+                        .slice(1)}
+                      dict={dict}
+                      lang={lang}
+                      variable={tidstrendVariable}
+                      onClick={(v) => setTidstrendVariable(v)}
                     />
-                  )}
+                    {verdiType === "n" && (
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={showNorway}
+                            onChange={() => setShowNorway(!showNorway)}
+                          />
+                        }
+                        label={
+                          <Typography variant="body2" sx={{ display: "inline" }}>
+                            {dict.analysebox.show_norway}
+                          </Typography>
+                        }
+                      />
+                    )}
+                  </div>
+                  <div className="ml-auto shrink-0">
+                    {lastNed}
+                  </div>
                 </div>
                 <ScreenshotBox
                   analyse={analyse}
-                  dict={dict}
-                  filename={`${analyse.data.name}_tidstrend.png`}
                   description={getDescription(analyse.data, lang, verdiType, aggregering, tidstrendVariable.name !== analyse.data.name ? tidstrendVariable : undefined, nynorsk)}
+                  graphRef={graphRef}
                 >
                   <AnalyseLineChart
                     analyse={analyse.data}
@@ -879,69 +854,83 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
           </TabPanel>
           <TabPanel value="demografi" sx={{ paddingX: 0, paddingBottom: 0 }}>
             <div className="px-4 sm:px-8">
-              <div className="flex flex-wrap gap-4 mb-4">
-                {analyse.data.kjonn === "begge" &&
+              <div className="flex gap-4">
+                <div className="flex flex-wrap gap-4 mb-4">
+                  {analyse.data.kjonn === "begge" &&
+                    <ToggleButtonGroup
+                      value={[showGenders]}
+                      exclusive
+                      onChange={() => setShowGenders(!showGenders)}
+                      disabled={analyse.data.kjonn !== "begge"}
+                    >
+                      <ToggleButton value={false}>
+                        {dict.analysebox.alle}
+                      </ToggleButton>
+                      <ToggleButton value={true}>
+                        {dict.analysebox.demography_split_gender}
+                      </ToggleButton>
+                    </ToggleButtonGroup>}
                   <ToggleButtonGroup
-                    value={[showGenders]}
+                    value={[demographyAndel]}
                     exclusive
-                    onChange={() => setShowGenders(!showGenders)}
-                    disabled={analyse.data.kjonn !== "begge"}
+                    onChange={() => setDemographyAndel(!demographyAndel)}
                   >
                     <ToggleButton value={false}>
-                      {dict.analysebox.alle}
+                      {dict.analysebox.antall}
                     </ToggleButton>
                     <ToggleButton value={true}>
-                      {dict.analysebox.demography_split_gender}
+                      {dict.analysebox.andel}
                     </ToggleButton>
-                  </ToggleButtonGroup>}
-                <ToggleButtonGroup
-                  value={[demographyAndel]}
-                  exclusive
-                  onChange={() => setDemographyAndel(!demographyAndel)}
-                >
-                  <ToggleButton value={false}>
-                    {dict.analysebox.antall}
-                  </ToggleButton>
-                  <ToggleButton value={true}>
-                    {dict.analysebox.andel}
-                  </ToggleButton>
-                </ToggleButtonGroup>
-                <VariableSelector
-                  analyse={analyse.data}
-                  views={analyse.data.views
-                    .slice(1)
-                    .filter((v) => demographyAvailable.has(v.name))}
-                  dict={dict}
-                  lang={lang}
-                  variable={demografiVariable}
-                  onClick={(v) => setDemografiVariable(v)}
-                />
-                <ToggleButtonGroup
-                  value={allYears}
-                  exclusive
-                  onChange={() => setAllYears(!allYears)}
-                >
-                  <ToggleButton value={true}>
-                    {dict.analysebox.all_years}
-                  </ToggleButton>
-                  <ToggleButton value={false}>
-                    {dict.analysebox.choose_year}
-                  </ToggleButton>
-                </ToggleButtonGroup>
-                {!allYears && <YearSelector
-                  years={years as number[]}
-                  lastYear={lastYear}
-                  year={year}
-                  setYear={setYear}
-                  dict={dict}
-                  speed={1000}
-                />}
+                  </ToggleButtonGroup>
+                  <VariableSelector
+                    analyse={analyse.data}
+                    views={analyse.data.views
+                      .slice(1)
+                      .filter((v) => demographyAvailable.has(v.name))}
+                    dict={dict}
+                    lang={lang}
+                    variable={demografiVariable}
+                    onClick={(v) => setDemografiVariable(v)}
+                  />
+                  <ToggleButtonGroup
+                    value={allYears}
+                    exclusive
+                    onChange={() => setAllYears(!allYears)}
+                  >
+                    <ToggleButton value={true}>
+                      {dict.analysebox.all_years}
+                    </ToggleButton>
+                    <ToggleButton value={false}>
+                      {dict.analysebox.choose_year}
+                    </ToggleButton>
+                  </ToggleButtonGroup>
+                  {!allYears && <YearSelectorDropdown
+                    className="block sm:hidden"
+                    years={years as number[]}
+                    lastYear={lastYear}
+                    year={year}
+                    setYear={setYear}
+                    dict={dict}
+                    speed={1000}
+                  />}
+                </div>
+                <div className="ml-auto shrink-0">
+                  {lastNed}
+                </div>
               </div>
+              {!allYears && <YearSelectorSlider
+                years={years as number[]}
+                lastYear={lastYear}
+                year={year}
+                setYear={setYear}
+                dict={dict}
+                speed={600}
+                className="hidden sm:block"
+              />}
             </div>
             <ScreenshotBox
+              graphRef={graphRef}
               analyse={analyse}
-              dict={dict}
-              filename={`${analyse.data.name}_demografi.png`}
               description={(
                 <Typography variant="body2">
                   {demographyAndel
@@ -966,6 +955,24 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
           </TabPanel>
         </Paper>
       </TabContext>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={4000}
+        onClose={() => setOpenSnackbar(false)}
+        slots={{ transition: Slide }}
+        message={dict.analysebox.copy_graph_snackbar_message}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        action={
+          <IconButton
+            size="small"
+            aria-label="close"
+            color="inherit"
+            onClick={() => setOpenSnackbar(false)}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        }
+      />
     </Box>
   );
 }

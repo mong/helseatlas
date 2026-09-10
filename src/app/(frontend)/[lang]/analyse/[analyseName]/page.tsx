@@ -1,17 +1,14 @@
 import { cache, Suspense } from "react";
 import {
   Alert,
-  Box,
   CircularProgress,
   Paper,
 } from "@mui/material";
-import Grid from "@mui/material/Grid";
 import { Lang } from "@/types";
 import { ChartContainer } from "@/components/Charts/ChartContainer";
 import { getDictionary } from "@/lib/dictionaries";
 import { getSubHeader, makeDateElem } from "@/lib/helpers";
 import TagList from "@/components/TagList";
-import DownloadDataButton from "./DownloadDataButton";
 import { notFound } from "next/navigation";
 import { Compare } from "@/components/Compare";
 import { draftMode } from "next/headers";
@@ -232,18 +229,6 @@ export default async function AnalysePage(props: {
                 <div className="prose max-w-none prose-li:marker:text-black prose-li:my-0">
                   <RichText data={analyse.about} enableGutter={true} />
                 </div>
-                <h3 className="mt-8">Data</h3>
-                <div className="prose max-w-none prose-li:marker:text-black prose-li:my-0">
-                  <div>
-                    <p>{dict.analysebox.download_data_text}</p>
-                  </div>
-                </div>
-                <Box sx={{ displayPrint: "none" }}>
-                  <DownloadDataButton
-                    analyse={analyse.data}
-                    dict={dict}
-                  />
-                </Box>
               </MaxWidth>
             </div>
           </Suspense>
