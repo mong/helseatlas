@@ -17,6 +17,7 @@ import configPromise from "@payload-config";
 import { LivePreviewListener } from "@/components/LivePreviewListener";
 import RichText from "@/components/RichText";
 import { MaxWidth } from "@/components/MaxWidth"
+import { Accordion, AccordionItem } from "@mong/material-ui";
 
 import {
   Header,
@@ -222,13 +223,18 @@ export default async function AnalysePage(props: {
                 <div className="prose max-w-none prose-li:marker:text-black prose-li:my-0">
                   <RichText data={analyse.discussion} enableGutter={true} />
                 </div>
-
-                <h3 className="mt-8">
-                  {dict.analysebox.info}
-                </h3>
-                <div className="prose max-w-none prose-li:marker:text-black prose-li:my-0">
-                  <RichText data={analyse.about} enableGutter={true} />
-                </div>
+                <Accordion
+                  gap="2"
+                  keyId="om-analysen"
+                  type="collapseOthers"
+                  variant="text"
+                >
+                  <AccordionItem title={dict.analysebox.info}>
+                    <div className="prose max-w-none prose-li:marker:text-black prose-li:my-0">
+                      <RichText data={analyse.about} enableGutter={true} />
+                    </div>
+                  </AccordionItem>
+                </Accordion>
               </MaxWidth>
             </div>
           </Suspense>
