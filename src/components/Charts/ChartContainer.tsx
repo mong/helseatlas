@@ -28,8 +28,7 @@ import CloseIcon from "@mui/icons-material/Close";
 
 import { ToggleButtonGroup, ToggleButton, Dropdown, SplitButton } from "@mong/material-ui"
 
-import { saveAs } from "file-saver";
-import html2canvas from "html2canvas";
+import { snapdom } from '@zumer/snapdom';
 
 import { Lang, View } from "@/types";
 import { AnalyseBarChart } from "./AnalyseBarChart";
@@ -556,56 +555,36 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
     </div>
   );
 
-  const getCanvas = async () => {
-    if (graphRef.current) {
-      return await html2canvas(graphRef.current, {
-        onclone: (_, elem) => {
-          Array.from(elem.querySelectorAll("*")).forEach((e) => {
-            const existingStyle = e.getAttribute("style") || "";
-            e.setAttribute(
-              "style",
-              `${existingStyle}; font-family: sans-serif`,
-            );
-          });
-        },
-      });
-    }
-    return Promise.reject(new Error("No ref to graph"));
-  };
-
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
   const graphRef = React.useRef<null | HTMLDivElement>(null);
 
   const lastNed = (
     <SplitButton
       label={dict.analysebox.download}
-      onClick={(option) => {
+      onClick={async (option) => {
         switch (option) {
           case dict.analysebox.copy_graph:
-            getCanvas().then((canvas) =>
-              canvas.toBlob(
-                (blob) =>
-                  blob &&
-                  navigator.clipboard
-                    .write([
-                      new ClipboardItem({
-                        "image/png": blob,
-                      }),
-                    ])
-                    .then(() => setOpenSnackbar(true)),
-              ),
-            );
+            if (graphRef.current) {
+              await snapdom.toBlob(graphRef.current, { type: "png" }).then((blob) => {
+                blob && navigator.clipboard.write([
+                  new ClipboardItem({ [blob.type]: blob })
+                ]);
+              }).then(() => setOpenSnackbar(true));
+            }
             break;
           case dict.analysebox.download_graph:
-            getCanvas().then((canvas) =>
-              canvas.toBlob((blob) => blob && saveAs(blob,
-                mainTab === "demografi"
+            if (graphRef.current) {
+              const result = await snapdom(graphRef.current);
+              await result.download({
+                format: 'png',
+                backgroundColor: "white",
+                filename: mainTab === "demografi"
                   ? `${analyse.data.name}_demografi.png`
                   : analyseTab === "enkeltår"
                     ? `${analyse.data.name}_${currentView.title[lang].toLowerCase().replace(" ", "_")}_${year}.png`
                     : `${analyse.data.name}_tidstrend.png`
-              )),
-            );
+              });
+            }
             break;
           case dict.analysebox.download_data:
             downloadJSON(analyse.data);
