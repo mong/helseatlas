@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import { getDictionary } from "@/lib/dictionaries";
 
 import { formatDate, getSubHeader, isNewRapport } from "@/lib/helpers";
-import RichText from "@/components/RichText";
 import { MaxWidth } from "@/components/MaxWidth"
 
 import {
@@ -20,7 +19,6 @@ import {
 import { convertLexicalToPlaintext } from "@payloadcms/richtext-lexical/plaintext";
 
 import { getAnalyserByTag, getTag, getRapporterByTag } from "@/services/payload";
-import React from "react";
 import { getPayload } from "payload";
 import configPromise from "@payload-config";
 import { Analyser } from "@/payload-types";

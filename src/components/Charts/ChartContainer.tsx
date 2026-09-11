@@ -30,7 +30,7 @@ import { ToggleButtonGroup, ToggleButton, Dropdown, SplitButton } from "@mong/ma
 
 import { snapdom } from '@zumer/snapdom';
 
-import { Lang, View } from "@/types";
+import { Lang } from "@/types";
 import { AnalyseBarChart } from "./AnalyseBarChart";
 import { AnalyseLineChart } from "./AnalyseLineChart";
 
@@ -51,7 +51,7 @@ const BACKGROUND_COLOR = "white";
 
 type VariableSelectorProps = {
   analyse: Analyser["data"];
-  views: View[];
+  views: Analyser["data"]["views"];
   dict: { [k: string]: { [k: string]: string } };
   variable: { viewName: string; name: string };
   onClick: ({ viewName, name }: { viewName: string; name: string }) => void;
@@ -358,7 +358,7 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
         (v) =>
           v.name ===
           (["demografi", "tidstrend"].includes(viewName) ? "total" : viewName),
-      ) as View
+      ) as Analyser["data"]["views"][0]
     ).year_range;
 
     return !year_range?.length

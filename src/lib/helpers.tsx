@@ -1,5 +1,5 @@
 import { Analyser, Rapporter } from "@/payload-types";
-import { Lang, View } from "@/types";
+import { Lang } from "@/types";
 import { Typography } from "@mui/material";
 
 export function formatDate(date: Date | string, lang: Lang) {
@@ -75,10 +75,10 @@ export function getVariableText(
   lang: Lang,
   variable: { viewName: string; name: string },
 ) {
-  const view = analyse.views.find((v) => v.name === variable.viewName) as View;
+  const view = analyse.views.find((v) => v.name === variable.viewName) as Analyser["data"]["views"][0];
   const variableObject = view.variables.find(
     (v) => v.name === variable.name,
-  ) as View["variables"][0];
+  ) as Analyser["data"]["views"][0]["variables"][0];
   return (
     <>
       {` (`}

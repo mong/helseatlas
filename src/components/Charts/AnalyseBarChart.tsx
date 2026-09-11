@@ -3,8 +3,6 @@ import type { BarProps } from '@mui/x-charts/BarChart';
 import classNames from "@/lib/ChartClasses.module.css";
 import { legendClasses } from '@mui/x-charts/ChartsLegend';
 
-import React from "react";
-
 import { useAnimateBar } from '@mui/x-charts/hooks';
 
 function AnimatedBar(props: BarProps & { special_bars: Set<number>, selected_bars: Set<number> }) {

@@ -1,6 +1,5 @@
 "use client";
 
-import { View } from "@/types";
 import {
   Accordion,
   AccordionDetails,
@@ -498,7 +497,7 @@ export const Compare = ({ oldAnalyse, newAnalyse, different }: CompareProps) => 
         Object.keys(newAnalyse.data[viewName][year]).flatMap((categoryType) => {
           const view = newAnalyse.views.find(
             (v) => v.name === viewName,
-          ) as View;
+          ) as Analyser["data"]["views"][0];
 
           return view.variables.flatMap((variable) => {
             const inflections = new Set(

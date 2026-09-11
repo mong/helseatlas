@@ -1,4 +1,4 @@
-import React, { type JSX } from "react";
+import { type JSX } from "react";
 import classNames from "@/lib/ChartClasses.module.css";
 
 type CarouselButtonsProps = {
