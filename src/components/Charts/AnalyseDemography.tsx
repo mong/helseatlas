@@ -15,6 +15,13 @@ type AnalyseDemographyProps = {
   variable: { viewName: string; name: string };
 };
 
+type DemographyCounts = {
+  kvinner: number;
+  kvinner_pop: number;
+  menn: number;
+  menn_pop: number;
+};
+
 const AnalyseDemography = ({
   analyse,
   year,
@@ -30,94 +37,65 @@ const AnalyseDemography = ({
   );
 
   const demographyData = React.useMemo(() => {
-    const data = Object.fromEntries(
-      years.map((year) => [
-        year,
-        aldre.map((alder) => {
-          const kvinner =
-            analyse.data.demografi[year][variable.viewName][alder][
-            variable.name
-            ]["kvinner"];
-          const kvinner_pop =
-            analyse.data.demografi[year]["population"][alder]["population"][
-            "kvinner"
-            ];
-          const menn =
-            analyse.data.demografi[year][variable.viewName][alder][
-            variable.name
-            ]["menn"];
-          const menn_pop =
-            analyse.data.demografi[year]["population"][alder]["population"][
-            "menn"
-            ];
+    const getCounts = (year: number, alder: number): DemographyCounts => ({
+      kvinner:
+        analyse.data.demografi[year][variable.viewName][alder][variable.name]
+          .kvinner,
+      kvinner_pop:
+        analyse.data.demografi[year].population[alder].population.kvinner,
+      menn:
+        analyse.data.demografi[year][variable.viewName][alder][variable.name]
+          .menn,
+      menn_pop:
+        analyse.data.demografi[year].population[alder].population.menn,
+    });
 
-          return {
-            alder: alder,
-            ...(analyse.kjonn !== "menn" && {
-              kvinner: kvinner,
-              kvinner_andel: (kvinner / kvinner_pop) * 100,
-            }),
-            ...(analyse.kjonn !== "kvinner" && {
-              menn: menn,
-              menn_andel: (menn / menn_pop) * 100,
-            }),
-            ...(analyse.kjonn === "begge" && {
-              begge: kvinner + menn,
-              begge_andel: ((kvinner + menn) / (kvinner_pop + menn_pop)) * 100,
-            }),
-          };
-        }),
-      ]),
-    );
-    const average = aldre.map((alder) => {
-      const kvinner = years
-        .map(
-          (year) =>
-            analyse.data.demografi[year][variable.viewName][alder][
-            variable.name
-            ]["kvinner"],
-        )
-        .reduce((a, b) => a + b, 0);
-      const kvinner_pop = years
-        .map(
-          (year) =>
-            analyse.data.demografi[year]["population"][alder]["population"][
-            "kvinner"
-            ],
-        )
-        .reduce((a, b) => a + b, 0);
-      const menn = years
-        .map(
-          (year) =>
-            analyse.data.demografi[year][variable.viewName][alder][
-            variable.name
-            ]["menn"],
-        )
-        .reduce((a, b) => a + b, 0);
-      const menn_pop = years
-        .map(
-          (year) =>
-            analyse.data.demografi[year]["population"][alder]["population"][
-            "menn"
-            ],
-        )
-        .reduce((a, b) => a + b, 0);
+    const makeRow = (
+      alder: number,
+      counts: DemographyCounts,
+      average: boolean,
+    ) => {
+      const { kvinner, kvinner_pop, menn, menn_pop } = counts;
+      const divisor = average ? years.length : 1;
 
       return {
-        alder: alder,
+        alder,
         ...(analyse.kjonn !== "menn" && {
-          kvinner: kvinner / years.length,
+          kvinner: kvinner / divisor,
           kvinner_andel: (kvinner / kvinner_pop) * 100,
         }),
         ...(analyse.kjonn !== "kvinner" && {
-          menn: menn / years.length,
+          menn: menn / divisor,
           menn_andel: (menn / menn_pop) * 100,
         }),
         ...(analyse.kjonn === "begge" && {
-          begge: (kvinner + menn) / years.length,
+          begge: (kvinner + menn) / divisor,
           begge_andel: ((kvinner + menn) / (kvinner_pop + menn_pop)) * 100,
         }),
       };
+    };
+
+    const data = Object.fromEntries(
+      years.map((year) => [
+        year,
+        aldre.map((alder) => makeRow(alder, getCounts(year, alder), false)),
+      ]),
+    );
+    const average = aldre.map((alder) => {
+      const totals = years.reduce(
+        (total, year) => {
+          const counts = getCounts(year, alder);
+          return {
+            kvinner: total.kvinner + counts.kvinner,
+            kvinner_pop: total.kvinner_pop + counts.kvinner_pop,
+            menn: total.menn + counts.menn,
+            menn_pop: total.menn_pop + counts.menn_pop,
+          };
+        },
+        { kvinner: 0, kvinner_pop: 0, menn: 0, menn_pop: 0 },
+      );
+
+      return makeRow(alder, totals, true);
     });
 
     return { ...data, all_years: average } as {
@@ -141,7 +119,7 @@ const AnalyseDemography = ({
           ),
         ]),
       ),
-    [analyse, years],
+    [analyse, years, demographyData],
   );
 
   const andelOrAntall = andel ? "andel" : "antall";
