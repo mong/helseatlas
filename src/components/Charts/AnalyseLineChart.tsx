@@ -84,22 +84,15 @@ export const AnalyseLineChart = ({
   const windowWidth = useWindowWidth();
 
   const dataset: { [k: number]: number; year: number }[] = React.useMemo(() => {
-    return [...years].map((year) => {
-      return {
-        year: year,
-        ...Object.fromEntries(
-          Object.keys(analyse.data[variable.viewName][year][level]).map(
-            (area) => [
-              area,
-              Number(
-                analyse.data[variable.viewName][year][level][area][
-                variable.name
-                ][inflection],
-              ),
-            ],
-          ),
-        ),
-      };
+    return years.map((year) => {
+      const areas = analyse.data[variable.viewName][year][level];
+      return Object.fromEntries([
+        ["year", year],
+        ...Object.keys(areas).map((area) => [
+          area,
+          Number(areas[area][variable.name][inflection]),
+        ]),
+      ]) as { [k: number]: number; year: number };
     });
   }, [analyse, years, level, variable]);
 
