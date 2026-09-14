@@ -804,7 +804,7 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
                     analyse={analyse.data}
                     years={years as number[]}
                     level={level}
-                    categoryFmt={(category) => getAreaName(category, lang)}
+                    categoryFmt={(category) => getAreaName(category, lang, nynorsk)}
                     valueFmt={(v) =>
                       formatNumber(
                         v || 0,
