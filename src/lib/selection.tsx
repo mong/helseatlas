@@ -59,7 +59,7 @@ export class Selection {
   }
 }
 
-export const getAreaName = (areaName: string, lang: Lang) =>
-  lang === "en" && areaName === "Norge"
-    ? "Norway"
+export const getAreaName = (areaName: string, lang: Lang, nynorsk: boolean) =>
+  areaName === "Norge"
+    ? (lang === "en" ? "Norway" : nynorsk ? "Noreg" : "Norge")
     : names[areaName] || areaName;

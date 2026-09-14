@@ -474,16 +474,16 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
             groups: level === "region"
               ? [{
                 items: Object.keys(hospitalStructure).map((region) => ({
-                  label: getAreaName(region, lang),
+                  label: getAreaName(region, lang, nynorsk),
                   value: region
                 }))
               }]
               : Object.keys(hospitalStructure).map((region) => ({
-                groupLabel: getAreaName(region, lang),
+                groupLabel: getAreaName(region, lang, nynorsk),
                 items: Array.from(hospitalStructure[region])
                   .toSorted()
                   .map((sykehus) => ({
-                    label: getAreaName(sykehus, lang),
+                    label: getAreaName(sykehus, lang, nynorsk),
                     value: sykehus
                   })),
               }))
@@ -728,7 +728,7 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
                         ]
                       }
                       variableFmt={(variable) => varNames[variable][lang]}
-                      categoryFmt={(category) => getAreaName(category, lang)}
+                      categoryFmt={(category) => getAreaName(category, lang, nynorsk)}
                       valueAxisFmt={(v) => new Intl.NumberFormat(lang).format(v)}
                       valueFmt={(v) =>
                         formatNumber(
