@@ -60,9 +60,10 @@ export const AnalyseBarChart = ({
           valueGetter(category, variable),
         ]),
       ),
-      sum: variables
-        .map((variable) => valueGetter(category, variable))
-        .reduce((a, b) => a + b),
+      sum: variables.reduce(
+        (sum, variable) => sum + valueGetter(category, variable),
+        0,
+      ),
     }))
     .toSorted((a, b) => b.sum - a.sum);
 
