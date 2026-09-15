@@ -41,7 +41,7 @@
     "@visx/responsive": "4.0.0",
     "@visx/scale": "4.0.0",
     "@visx/xychart": "4.0.0",
-    "@zumer/snapdom": "^2.24.18",
+    "@zumer/snapdom": "^3.0.0",
     "d3-array": "3.2.4",
     "d3-format": "3.1.2",
     "d3-geo": "3.1.1",
