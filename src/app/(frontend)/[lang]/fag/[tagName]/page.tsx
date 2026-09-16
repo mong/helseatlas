@@ -172,7 +172,7 @@ export default async function KompendiumPage(props: {
           <PageContent>
             <MaxWidth size="large">
               <div className="py-8 md:py-16">
-                <h2 className="pb-8">{dict.general.analyser}</h2>
+                <h2 className="pb-8">{dict.general.årlig_oppdaterte_analyser}</h2>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {analyser.map(async (analyse, i) => (
                     <AnalysisCard
