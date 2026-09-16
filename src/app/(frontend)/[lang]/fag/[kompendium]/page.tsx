@@ -130,8 +130,7 @@ export default async function KompendiumPage(props: {
         ]}
       />
       <Breadcrumbs
-        pathname={"/"}
-        leading={breadcrumbs}
+        explicitTrail={breadcrumbs}
       />
       <PageLayout>
         <div className="bg-white py-4 md:py-8">

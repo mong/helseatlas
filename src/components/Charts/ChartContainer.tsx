@@ -356,8 +356,7 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
     const year_range = (
       analyse.data.views.find(
         (v) =>
-          v.name ===
-          (["demografi", "tidstrend"].includes(viewName) ? "total" : viewName),
+          v.name === (viewName === "demografi" ? "total" : viewName),
       ) as Analyser["data"]["views"][0]
     ).year_range;
 
