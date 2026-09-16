@@ -14,7 +14,7 @@
   "dependencies": {
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
-    "@mong/material-ui": "^13.15.2",
+    "@mong/material-ui": "^13.15.3",
     "@mui/icons-material": "9.4.0",
     "@mui/lab": "9.0.0-beta.9",
     "@mui/material": "9.4.0",
@@ -41,7 +41,7 @@
     "@visx/responsive": "4.0.0",
     "@visx/scale": "4.0.0",
     "@visx/xychart": "4.0.0",
-    "@zumer/snapdom": "^2.24.18",
+    "@zumer/snapdom": "^3.0.0",
     "d3-array": "3.2.4",
     "d3-format": "3.1.2",
     "d3-geo": "3.1.1",
