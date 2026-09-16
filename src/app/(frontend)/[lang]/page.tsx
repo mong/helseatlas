@@ -53,7 +53,9 @@ export default async function MainPage(props: MainPageProps) {
   const dict = await getDictionary(lang);
   const kompendier = Object.groupBy(
     (await getKompendier({ lang }))
-      .toSorted((a, b) => a.title.localeCompare(b.title, lang)),
+      .toSorted((a, b) =>
+        a.identifier === "annet" ? 1 : b.identifier === "annet" ? -1 // Annet should always be last
+          : a.title.localeCompare(b.title, lang)),
     ({ taggedRapporter }) => (taggedRapporter?.docs as Rapporter[])?.filter(d => d.publiseringsStatus === "published").some(
       isNewRapport) ? "new" : "old"
   )
@@ -87,9 +89,9 @@ export default async function MainPage(props: MainPageProps) {
               <div className="grid grid-cols-[repeat(auto-fill,minmax(215px,1fr))] md:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5 auto-rows-[90px] md:auto-rows-[155px] pb-4">
                 {(kompendier.new || [])
                   .map(komp => (({
-                  ...komp,
-                  new: true
-                }) as Tag & { new?: boolean }))
+                    ...komp,
+                    new: true
+                  }) as Tag & { new?: boolean }))
                   .concat(kompendier.old || []).map((komp) => {
                     const n_analyser = komp.taggedAnalyser?.docs?.filter((d => (d as Analyser).publiseringsStatus === "published")).length || 0;
                     const n_rapporter = komp.taggedRapporter?.docs?.filter((d => (d as Rapporter).publiseringsStatus === "published")).length || 0;
