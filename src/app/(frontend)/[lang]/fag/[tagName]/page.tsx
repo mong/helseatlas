@@ -22,6 +22,7 @@ import { getAnalyserByTag, getTag, getRapporterByTag } from "@/services/payload"
 import { getPayload } from "payload";
 import configPromise from "@payload-config";
 import { Analyser } from "@/payload-types";
+import RichText from "@/components/RichText";
 
 
 export const dynamic = 'force-static';
@@ -43,7 +44,7 @@ export async function generateStaticParams() {
       select: {
         identifier: true,
       },
-    })).docs.map(({ identifier }) => ({ kompendium: identifier, lang }))
+    })).docs.map(({ identifier }) => ({ tagName: identifier, lang }))
   ))).flat();
   return result;
 }
@@ -54,10 +55,10 @@ const getSummary = (analyse: Analyser) => {
 };
 
 export const generateMetadata = async (props: {
-  params: Promise<{ lang: Lang; kompendium: string }>;
+  params: Promise<{ lang: Lang; tagName: string }>;
 }) => {
-  const { kompendium, lang } = await props.params;
-  const tag = await getTag({ identifier: kompendium, lang });
+  const { tagName, lang } = await props.params;
+  const tag = await getTag({ identifier: tagName, lang });
 
   if (!tag || !["en", "no"].includes(lang)) {
     notFound();
@@ -75,11 +76,11 @@ export const generateMetadata = async (props: {
 };
 
 export default async function KompendiumPage(props: {
-  params: Promise<{ lang: Lang; kompendium: string }>;
+  params: Promise<{ lang: Lang; tagName: string }>;
 }) {
-  const { kompendium, lang } = await props.params;
+  const { tagName, lang } = await props.params;
 
-  const tag = await getTag({ identifier: kompendium, lang });
+  const tag = await getTag({ identifier: tagName, lang });
 
   if (!tag || !["en", "no"].includes(lang)) {
     notFound();
@@ -88,12 +89,12 @@ export default async function KompendiumPage(props: {
   const dict = await getDictionary(lang);
 
   const analyser = await getAnalyserByTag({
-    identifier: kompendium,
+    identifier: tagName,
     lang,
   });
 
   const rapporter = await getRapporterByTag({
-    identifier: kompendium,
+    identifier: tagName,
     lang,
     select: {
       title: true,
@@ -115,7 +116,7 @@ export default async function KompendiumPage(props: {
       name: dict.general.health_atlas,
     },
     {
-      href: `/${lang}/fag/${kompendium}`,
+      href: `/${lang}/fag/${tagName}`,
       name: tag.title,
     },
   ];
@@ -139,10 +140,9 @@ export default async function KompendiumPage(props: {
               <div className="text-center">
                 <h1>{tag.title}</h1>
                 <br />
-                {/* Fjerner midlertidig description i en overgangsfase */}
-                {/* <div className="prose max-w-none prose-li:marker:text-black prose-li:my-0">
+                <div className="prose max-w-none prose-li:marker:text-black prose-li:my-0">
                   <RichText data={tag.description!} enableGutter={true} />
-                </div> */}
+                </div>
               </div>
             </MaxWidth>
             <MaxWidth size="large">

@@ -44,18 +44,9 @@ export const Tags: CollectionConfig = {
       },
     },
     {
-      name: "isKompendium",
-      type: "checkbox",
-      label: "Er denne taggen et kompendium",
-      required: true,
-    },
-    {
       name: "description",
       type: "richText",
       localized: true,
-      admin: {
-        condition: (_, siblingData) => siblingData.isKompendium,
-      },
       editor: lexicalEditor({
         features: ({ rootFeatures }) => {
           return [

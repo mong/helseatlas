@@ -333,7 +333,6 @@ export interface Tag {
    * Unik ID for taggen.
    */
   identifier: string;
-  isKompendium: boolean;
   description?: {
     root: {
       type: string;
@@ -1030,7 +1029,6 @@ export interface MediaSelect<T extends boolean = true> {
 export interface TagsSelect<T extends boolean = true> {
   title?: T;
   identifier?: T;
-  isKompendium?: T;
   description?: T;
   taggedRapporter?: T;
   taggedAnalyser?: T;
