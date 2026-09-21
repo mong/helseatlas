@@ -61,10 +61,16 @@ export default async function MainPage(props: MainPageProps) {
   )
 
 
-  const breadcrumbs = [{
-    href: lang === "en" ? "/en" : "/",
-    name: dict.general.health_atlas,
-  }];
+  const breadcrumbs = [
+    {
+      href: `https://apps.skde.no/`,
+      name: dict.general.analyseverktøy,
+    },
+    {
+      href: lang === "en" ? "/en" : "/",
+      name: dict.general.health_atlas,
+    }
+  ];
 
   return (
     <>

@@ -20,6 +20,7 @@ import {
   PageContent,
   HeroBanner,
 } from "@mong/material-ui";
+import { getDictionary } from '@/lib/dictionaries'
 
 export const dynamic = 'force-static';
 export const revalidate = 60;
@@ -60,6 +61,7 @@ export default async function Page({ params: paramsPromise }: Args) {
 
   const { slug = '', lang } = await paramsPromise;
   const page = await queryPageBySlug({ slug, lang });
+  const dict = await getDictionary(lang);
 
   const payload = await getPayload({ config: configPromise });
   const otherLang = (await payload.find({
@@ -79,6 +81,10 @@ export default async function Page({ params: paramsPromise }: Args) {
   if (!page) return notFound();
 
   const breadcrumbs = [
+    {
+      href: `https://apps.skde.no/`,
+      name: dict.general.analyseverktøy,
+    },
     {
       href: `/${lang}/${slug}`,
       name: page.title,

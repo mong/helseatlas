@@ -27,8 +27,6 @@ import type { ResultBoxBlock as ResultBoxBlockProps } from '@/payload-types'
 import { makeDateElem } from '@/lib/helpers'
 
 
-
-
 export const dynamic = 'force-static';
 export const revalidate = 60;
 
@@ -120,6 +118,10 @@ export default async function Rapport({ params: paramsPromise }: Args) {
   const dict = await getDictionary(lang);
 
   const breadcrumbs = [
+    {
+      href: `https://apps.skde.no/`,
+      name: dict.general.analyseverktøy,
+    },
     {
       href: lang === "en" ? "/en" : "/",
       name: dict.general.health_atlas,

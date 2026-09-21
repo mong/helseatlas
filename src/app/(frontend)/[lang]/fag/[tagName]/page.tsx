@@ -112,6 +112,10 @@ export default async function KompendiumPage(props: {
 
   const breadcrumbs = [
     {
+      href: `https://apps.skde.no/`,
+      name: dict.general.analyseverktøy,
+    },
+    {
       href: lang === "en" ? "/en" : "/",
       name: dict.general.health_atlas,
     },
