@@ -3,7 +3,6 @@ import { LineChart } from "@mui/x-charts/LineChart";
 import { Selection } from "@/lib/selection";
 import React from "react";
 import { Analyser } from "@/payload-types";
-import { legendClasses } from '@mui/x-charts/ChartsLegend';
 
 const linechart_colors: {
   sykehus: { [k: string]: string };
@@ -56,18 +55,6 @@ type AnalyseLineChartProps = {
   lang: Lang;
 };
 
-const useWindowWidth = () => {
-  const [width, setWidth] = React.useState(window.innerWidth);
-
-  React.useEffect(() => {
-    const handleResize = () => setWidth(window.innerWidth);
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-  return width;
-};
-
 export const AnalyseLineChart = ({
   analyse,
   years,
@@ -81,7 +68,6 @@ export const AnalyseLineChart = ({
   maxValue,
   lang,
 }: AnalyseLineChartProps) => {
-  const windowWidth = useWindowWidth();
 
   const dataset: { [k: string]: number; year: number }[] = React.useMemo(() => {
     return years.map((year) => {
@@ -96,7 +82,6 @@ export const AnalyseLineChart = ({
     });
   }, [analyse, years, level, variable]);
 
-  const smallFactor = Math.min(windowWidth / 1000, 1);
   const selectionIDs = ["Norge", ...Array.from(selection[level]).map(String)];
 
   return (
@@ -117,8 +102,9 @@ export const AnalyseLineChart = ({
           dataKey: area,
           id: area,
           valueFormatter: valueFmt,
-          curve: "monotoneX",
-          showMark: false,
+          curve: "linear",
+          showMark: true,
+          shape: "circle",
           label: categoryFmt(area),
           color: linechart_colors[level][area],
         }))}
@@ -127,20 +113,6 @@ export const AnalyseLineChart = ({
           no: "Ingen opptaksområder valgt",
           en: "No referrral areas chosen",
         }[lang]
-      }}
-      slotProps={{
-        legend: {
-          sx: {
-            padding: 2,
-            [`.${legendClasses.mark}`]: {
-              width: 5 + Math.round(15 * smallFactor),
-              ["& path"]: { strokeWidth: 5 }
-            },
-            [`.${legendClasses.label}`]: {
-              fontSize: 6 + Math.round(8 * smallFactor)
-            }
-          },
-        },
       }}
     />
   );
