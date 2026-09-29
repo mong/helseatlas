@@ -259,7 +259,7 @@ importers:
         version: 4.0.0(@react-spring/web@10.1.2(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@zumer/snapdom':
         specifier: ^3.1.1
-        version: 3.1.1
+        version: 3.2.0
       d3-array:
         specifier: 3.2.4
         version: 3.2.4
@@ -2627,8 +2627,8 @@ packages:
       '@types/react-dom':
         optional: true
 
-  '@zumer/snapdom@3.1.1':
-    resolution: {integrity: sha512-QMLk2B6ijJArvlQNWlVIJjPNG+29edjgOczmvM2VkONr0TQ6AcTvCqPTJPzTiYi6p/Bt0BcVFeXqYHQWEGnwwA==}
+  '@zumer/snapdom@3.2.0':
+    resolution: {integrity: sha512-FVYVoH3XXJdgFfZo6VxEX6DZ5XWNlYypMynOLKKFTa0XEZBMOVSQBVDHO66uIcK9q7yuYMyyAb5/KaMYsHIuxg==}
 
   accepts@2.0.0:
     resolution: {integrity: sha512-5cvg6CtKwfgdmVqY1WIiXKc3Q1bkRqGLi+2W/6ao+6Y7gu/RCwRuAhGEzh5B4KlszSuTLgZYuqFqo5bImjNKng==}
@@ -5947,7 +5947,7 @@ snapshots:
       '@jest/schemas': 29.6.3
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 26.6.2
+      '@types/node': 26.6.3
       '@types/yargs': 17.0.35
       chalk: 4.1.2
 
@@ -7491,7 +7491,7 @@ snapshots:
       '@types/react': 19.3.0
       '@types/react-dom': 19.3.0(@types/react@19.3.0)
 
-  '@zumer/snapdom@3.1.1': {}
+  '@zumer/snapdom@3.2.0': {}
 
   accepts@2.0.0:
     dependencies:
@@ -7662,7 +7662,7 @@ snapshots:
 
   chrome-launcher@0.15.2(supports-color@8.1.1):
     dependencies:
-      '@types/node': 26.6.2
+      '@types/node': 26.6.3
       escape-string-regexp: 4.0.0
       is-wsl: 2.2.0
       lighthouse-logger: 1.4.2(supports-color@8.1.1)
@@ -7671,7 +7671,7 @@ snapshots:
 
   chromium-edge-launcher@0.3.0(supports-color@8.1.1):
     dependencies:
-      '@types/node': 26.6.2
+      '@types/node': 26.6.3
       escape-string-regexp: 4.0.0
       is-wsl: 2.2.0
       lighthouse-logger: 1.4.2(supports-color@8.1.1)
@@ -8511,7 +8511,7 @@ snapshots:
   jest-util@29.7.0:
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 26.6.2
+      '@types/node': 26.6.3
       chalk: 4.1.2
       ci-info: 3.9.0
       graceful-fs: 4.2.11
@@ -8528,7 +8528,7 @@ snapshots:
 
   jest-worker@29.7.0:
     dependencies:
-      '@types/node': 26.6.2
+      '@types/node': 26.6.3
       jest-util: 29.7.0
       merge-stream: 2.0.0
       supports-color: 8.1.1
