@@ -9,6 +9,8 @@ import {
   Footer,
 } from "@mong/material-ui";
 
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
+
 import './globals.css'
 
 
@@ -28,13 +30,15 @@ export default async function RootLayout(props: {
     <html lang={lang}>
       <MatomoTracker />
       <body>
-        <AdminBar preview={isEnabled} />
-        <SkdeThemeProvider>
-          <MainLayout>
-            {props.children}
-            <Footer lang={lang} />
-          </MainLayout>
-        </SkdeThemeProvider>
+        <AppRouterCacheProvider>
+          <AdminBar preview={isEnabled} />
+          <SkdeThemeProvider>
+            <MainLayout>
+              {props.children}
+              <Footer lang={lang} />
+            </MainLayout>
+          </SkdeThemeProvider>
+        </AppRouterCacheProvider>
       </body>
     </html>
   );
