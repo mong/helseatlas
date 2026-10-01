@@ -40,6 +40,7 @@ export default buildConfig({
   // Mongoose is shown as an example, but you can also use Postgres
   indexSortableFields: true,
   db: postgresAdapter({
+    push: process.env.NODE_ENV !== "production" || process.env.PAYLOAD_DEV_SCHEMA_PUSH === "true",
     pool: {
       connectionString: process.env.POSTGRES_URI || "",
     },
