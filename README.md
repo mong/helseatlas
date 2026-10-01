@@ -16,10 +16,12 @@ pnpm dev
 
 ## Docker
 
-Du kan bygge et lokalt docker-image av web-appen.
+Builden genererer statiske sider fra PostgreSQL, så start den lokale databasen før du bygger appen. Sett `POSTGRES_URI` i `.env.local` til den lokale URI-en `postgres://postgres:postgres@localhost:5432/helseatlas`.
 
-```
-docker build --secret id=node_auth_token,env=NODE_AUTH_TOKEN --secret id=payload_secret,env=PAYLOAD_SECRET --secret id=preview_secret,env=PREVIEW_SECRET --secret id=postgres_uri,env=POSTGRES_URI -t helseatlas .
-docker run -p 3000:3000 --env-file .env.local helseatlas
+```bash
+docker compose --env-file .env.local up -d db
+docker compose --env-file .env.local build app
+docker compose --env-file .env.local up -d app
 ```
 
+Appen er tilgjengelig på [http://localhost:3000](http://localhost:3000). `.env.local` må også inneholde verdiene for `NODE_AUTH_TOKEN`, `PAYLOAD_SECRET` og `PREVIEW_SECRET`. Builden kobler til PostgreSQL i Compose via Docker BuildKit sin `network.host`-tilgang, som må være tillatt av BuildKit-builderen. Databasen oppretter Payload-skjemaet ved oppstart, og innholdet lagres i et Docker-volum. Legg inn innhold før app-byggingen dersom det skal med i de statisk genererte sidene; sidene oppdateres deretter med 60 sekunders revalidering.

@@ -1,0 +1,50 @@
+services:
+  app:
+    build:
+      context: .
+      network: host
+      entitlements:
+        - network.host
+      secrets:
+        - node_auth_token
+        - payload_secret
+        - preview_secret
+        - postgres_uri
+    env_file: .env.local
+    environment:
+      PAYLOAD_DEV_SCHEMA_PUSH: "true"
+      POSTGRES_URI: postgres://postgres:postgres@db:5432/helseatlas
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: helseatlas
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d helseatlas"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+
+secrets:
+  node_auth_token:
+    environment: NODE_AUTH_TOKEN
+  payload_secret:
+    environment: PAYLOAD_SECRET
+  preview_secret:
+    environment: PREVIEW_SECRET
+  postgres_uri:
+    environment: POSTGRES_URI
