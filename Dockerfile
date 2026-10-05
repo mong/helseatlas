@@ -30,7 +30,6 @@ COPY . .
 # ENV NEXT_TELEMETRY_DISABLED 1
 
 ARG NEXT_PUBLIC_SERVER_URL="https://analyser.skde.no"
-ENV PAYLOAD_DEV_SCHEMA_PUSH=true
 
 RUN \
     --mount=type=secret,id=payload_secret,env=PAYLOAD_SECRET \

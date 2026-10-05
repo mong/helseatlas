@@ -8,6 +8,7 @@ import {
 
 import { anyone } from "../access/anyone";
 import { authenticated } from "../access/authenticated";
+import { useAzureStorage } from "../utilities/storageMode";
 
 export const Media: CollectionConfig = {
   slug: "media",
@@ -44,7 +45,8 @@ export const Media: CollectionConfig = {
   ],
   
   upload: {
-    disableLocalStorage: true,
+    disableLocalStorage: useAzureStorage,
+    ...(!useAzureStorage && { staticDir: "media" }),
     adminThumbnail: "thumbnail",
     focalPoint: true,
     imageSizes: [
