@@ -28,8 +28,8 @@ Hvis du med hensikt vil utvikle mot produksjonsdatabasen og Azure Storage, oppre
 
 ```dotenv
 POSTGRES_URI=your-database-uri
-PAYLOAD_SECRET=local-payload-secret
-PREVIEW_SECRET=local-preview-secret
+PAYLOAD_SECRET=your-payload-secret
+PREVIEW_SECRET=your-preview-secret
 USE_AZURE_STORAGE=true
 AZURE_STORAGE_ACCOUNT_BASEURL=your-storage-account-base-url
 AZURE_STORAGE_CONNECTION_STRING=your-storage-connection-string
