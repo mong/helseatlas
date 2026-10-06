@@ -31,6 +31,9 @@ yarn-error.log*
 
 # local env files
 .env*.local*
+!.env.local-db
+.env.production-db
+.npmrc.local
 
 # vercel
 .vercel
@@ -43,5 +46,6 @@ next-env.d.ts
 
 # Data files
 datafiler/*
+media/*
 public/media/
 public/data

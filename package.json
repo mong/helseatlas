@@ -4,11 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev": "dotenv -o -e .env.local-db -- next dev",
+    "dev:production-db": "dotenv -o -e .env.production-db -- next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "generate:types": "PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:types",
+    "generate:types": "PAYLOAD_GENERATE_TYPES=true PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:types",
     "generate:importmap": "PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:importmap"
   },
   "dependencies": {
@@ -71,6 +72,7 @@
     "@types/node": "26.6.3",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
+    "dotenv-cli": "^11.0.0",
     "eslint": "10.11.0",
     "typescript": "7.0.2",
     "typescript-eslint": "8.71.0"

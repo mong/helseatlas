@@ -3,6 +3,7 @@ import type { CollectionConfig } from "payload";
 import { anyone } from "../access/anyone";
 import { authenticated } from "../access/authenticated";
 import { revalidateTag } from "next/cache";
+import { useAzureStorage } from "../utilities/storageMode";
 
 export const Datafiler: CollectionConfig = {
   slug: "datafiler",
@@ -22,6 +23,7 @@ export const Datafiler: CollectionConfig = {
   },
   fields: [],
   upload: {
-    disableLocalStorage: true,
+    disableLocalStorage: useAzureStorage,
+    ...(!useAzureStorage && { staticDir: "datafiler" }),
   },
 };
