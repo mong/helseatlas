@@ -93,8 +93,6 @@ type Args = {
 export default async function Rapport({ params: paramsPromise }: Args) {
   const { isEnabled: draft } = await draftMode();
 
-
-
   const { slug = '', lang } = await paramsPromise;
   const rapport = await queryRapportBySlug({ slug, lang });
 
@@ -197,6 +195,8 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
   const { slug = '', lang } = await paramsPromise
   const rapport = await queryRapportBySlug({ slug, lang })
   const dict = await getDictionary(lang);
+
+  if (!rapport) notFound();
 
   return {
     title: `${rapport.title} - ${dict.general.health_atlas}`,

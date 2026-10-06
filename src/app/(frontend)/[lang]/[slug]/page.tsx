@@ -123,11 +123,13 @@ export default async function Page({ params: paramsPromise }: Args) {
 
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
   const { slug = '', lang } = await paramsPromise
-  const rapport = await queryPageBySlug({ slug, lang })
+  const page = await queryPageBySlug({ slug, lang })
+
+  if (!page) notFound();
 
   return {
-    title: rapport?.meta?.title || rapport.title,
-    description: rapport?.meta?.description || undefined,
+    title: page?.meta?.title || page.title,
+    description: page?.meta?.description || undefined,
   };
 }
 
