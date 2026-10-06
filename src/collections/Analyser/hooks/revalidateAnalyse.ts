@@ -1,6 +1,6 @@
 import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'payload'
 
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidatePath } from 'next/cache'
 
 import type { Analyser } from '../../../payload-types'
 
@@ -15,8 +15,7 @@ export const revalidateAnalyse: CollectionAfterChangeHook<Analyser> = ({
       payload.logger.info(`Revalidating analyse at path: ${path}`)
 
       revalidatePath(path, "page")
-
-      revalidateTag('analyser-sitemap', 'max')
+      revalidatePath("/sitemap.xml")
     }
 
     // If the analyse was previously published, we need to revalidate the old path
@@ -26,7 +25,7 @@ export const revalidateAnalyse: CollectionAfterChangeHook<Analyser> = ({
       payload.logger.info(`Revalidating old analyse at path: ${oldPath}`)
 
       revalidatePath(oldPath, "page")
-      revalidateTag('analyser-sitemap', 'max')
+      revalidatePath("/sitemap.xml")
     }
   }
   return doc
@@ -37,7 +36,7 @@ export const revalidateDelete: CollectionAfterDeleteHook<Analyser> = ({ doc, req
     const path = `/[lang]/analyse/${doc?.slug}`
 
     revalidatePath(path, "page")
-    revalidateTag('analyser-sitemap', 'max')
+    revalidatePath("/sitemap.xml")
   }
 
   return doc

@@ -2,7 +2,7 @@ import { Lang } from "@/types";
 import { getPayload } from "payload";
 import { cache } from "react";
 import config from "@payload-config";
-import { Analyser, Rapporter, Tag } from "@/payload-types";
+import { Analyser, Page, Rapporter, Tag } from "@/payload-types";
 
 export const getTag = cache(
   async ({ identifier, lang }: { identifier: string; lang: Lang }) => {
@@ -137,3 +137,19 @@ export const getRapporter = cache(async (
   return result.docs as Rapporter[];
 });
 
+export const getPages = cache(async ({ lang }: { lang: Lang }) => {
+  const payload = await getPayload({ config });
+
+  const result = await payload.find({
+    collection: "pages",
+    limit: 0,
+    locale: lang,
+    pagination: false,
+    fallbackLocale: false,
+    where: {
+      publiseringsStatus: { equals: "published" },
+    },
+  });
+
+  return result.docs as Page[];
+});

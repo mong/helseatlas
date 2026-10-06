@@ -1,5 +1,5 @@
 import { Analyser, Rapporter } from "@/payload-types";
-import { getAnalyser, getKompendier, getRapporter } from "@/services/payload";
+import { getAnalyser, getKompendier, getPages, getRapporter } from "@/services/payload";
 import type { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -8,6 +8,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const rapporter = await getRapporter({ lang: "no" });
   const rapporter_en = new Set((await getRapporter({ lang: "en", select: { slug: true } })).map(r => r.slug!));
+  const pages = await getPages({ lang: "no" });
+  const pages_en = new Set((await getPages({ lang: "en" })).map(page => page.slug!));
 
   const documents = (analyser as (Analyser | Rapporter)[]).concat(rapporter);
 
@@ -87,6 +89,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             ...(rapporter_en.has(rapport.slug!) && { en: `https://analyser.skde.no/en/rapporter/${rapport.slug}` })
           },
         }
+      })),
+    ).concat(
+      pages.map((page) => ({
+        url: `https://analyser.skde.no/no/${page.slug}`,
+        lastModified: new Date(page.publishedAt || page.createdAt),
+        alternates: {
+          languages: {
+            no: `https://analyser.skde.no/no/${page.slug}`,
+            ...(pages_en.has(page.slug!) && { en: `https://analyser.skde.no/en/${page.slug}` })
+          },
+        },
       })),
     );
 }

@@ -1,6 +1,6 @@
 import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'payload'
 
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidatePath } from 'next/cache'
 
 import type { Rapporter } from '../../../payload-types'
 
@@ -15,7 +15,7 @@ export const revalidateRapport: CollectionAfterChangeHook<Rapporter> = ({
       payload.logger.info(`Revalidating rapport at path: ${path}`)
 
       revalidatePath(path, "page")
-      revalidateTag('rapporter-sitemap', 'max')
+      revalidatePath("/sitemap.xml")
     }
 
     // If the rapport was previously published, we need to revalidate the old path
@@ -25,7 +25,7 @@ export const revalidateRapport: CollectionAfterChangeHook<Rapporter> = ({
       payload.logger.info(`Revalidating old rapport at path: ${oldPath}`)
 
       revalidatePath(oldPath, "page")
-      revalidateTag('rapporter-sitemap', 'max')
+      revalidatePath("/sitemap.xml")
     }
   }
   return doc
@@ -36,7 +36,7 @@ export const revalidateDelete: CollectionAfterDeleteHook<Rapporter> = ({ doc, re
     const path = `/[lang]/rapporter/${doc?.slug}`
 
     revalidatePath(path, "page")
-    revalidateTag('rapporter-sitemap', 'max')
+    revalidatePath("/sitemap.xml")
   }
 
   return doc
