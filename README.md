@@ -6,7 +6,13 @@ Utviklingsversjonen av web-appen blir kontinuerlig distribuert fra main-grenen t
 
 ## Kjør lokalt
 
-Første gang: installer avhengighetene. GitHub Packages-tokenet for den private `@mong/material-ui`-pakken må ligge i `.npmrc.local`, så bruk den filen som pnpm-konfigurasjon:
+GitHub Packages-tokenet for den private `@mong/material-ui`-pakken må ligge i `.npmrc.local`, i dette formatet:
+
+```
+//npm.pkg.github.com/:_authToken=your-auth-token
+```
+
+Så kan pakker installeres slik:
 
 ```bash
 NPM_CONFIG_USERCONFIG=.npmrc.local pnpm install
@@ -18,13 +24,17 @@ Start en local PostgreSQL-server med docker:
 docker compose up -d --wait db
 ```
 
-Kjør `pnpm dev` for å starte appen med `.env.local-db`. Hvis du vil koble til produksjonsdatabasen og Azure Storage, bruk `pnpm dev:production-db`, som laster inn `.env.production-db` (se lenger ned). Verdiene i den valgte filen overstyrer eventuelle tilsvarende miljøvariabler som allerede er satt i skallet.
+PostgreSQL-databasen er da tom. Opplastede medier og datafiler lagres lokalt i `media/` og `datafiler/`, ikke i Azure.
+Hvis man har lyst på litt eksempel-data i den lokale databasen kan man kjøre dette:
 
-Åpne [http://localhost:3000](http://localhost:3000). Docker Compose brukes bare til PostgreSQL; appen kjører direkte på maskinen din. Payload oppretter databaseskjemaet automatisk i utviklingsmodus, og innholdet lagres i Docker-volumet `postgres_data`.
+```bash
+pnpm seed:local-db
+```
 
-PostgreSQL-databasen er tom ved første oppstart og får ikke innhold fra produksjon. Opplastede medier og datafiler lagres lokalt i `media/` og `datafiler/`, ikke i Azure.
+Så kan du kjøre appen med `pnpm dev`.
 
-Hvis du med vil utvikle mot produksjonsdatabasen og Azure Storage, opprett `.env.production-db` med disse verdiene:
+
+Hvis du med vil utvikle mot produksjonsdatabasen og Azure Storage, så må du opprette `.env.production-db` med disse verdiene:
 
 ```dotenv
 POSTGRES_URI=your-database-uri
@@ -37,5 +47,3 @@ AZURE_STORAGE_CONTAINER_NAME=your-container-name
 ```
 
 Kjør deretter `pnpm dev:production-db`. Payload kjører fortsatt i utviklingsmodus og kan automatisk endre databaseskjemaet, og appen kan skrive data til begge tjenestene.
-
-I produksjon brukes `POSTGRES_URI` fra miljøet til produksjonsdatabasen, og Azure Storage-pluginen brukes for `media` og `datafiler`. Sett også `AZURE_STORAGE_ACCOUNT_BASEURL`, `AZURE_STORAGE_CONNECTION_STRING` og `AZURE_STORAGE_CONTAINER_NAME` i produksjonsmiljøet. Den lokale databasedefaulten og lokale filopplastinger er bare aktive når `NODE_ENV=development`.

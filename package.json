@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "dotenv -o -e .env.local-db -- next dev",
     "dev:production-db": "dotenv -o -e .env.production-db -- next dev",
+    "seed:local-db": "SEED_LOCAL_DOCKER_DB=1 dotenv -o -e .env.local-db -- payload run scripts/seed-local-db.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",

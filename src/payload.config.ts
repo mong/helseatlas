@@ -19,7 +19,6 @@ import { getServerSideURL } from "./utilities/getURL";
 import { useAzureStorage } from "./utilities/storageMode";
 
 
-
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 const isDevelopment = process.env.NODE_ENV === "development";
@@ -56,8 +55,6 @@ export default buildConfig({
   },
   // Your Payload secret - should be a complex and secure string, unguessable
   secret: process.env.PAYLOAD_SECRET || "",
-  // Whichever Database Adapter you're using should go here
-  // Mongoose is shown as an example, but you can also use Postgres
   indexSortableFields: true,
   db: postgresAdapter({
     pool: {
