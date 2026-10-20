@@ -76,7 +76,7 @@
     "dotenv-cli": "^11.0.0",
     "eslint": "10.13.0",
     "typescript": "7.0.2",
-    "typescript-eslint": "8.71.2"
+    "typescript-eslint": "8.72.0"
   },
   "packageManager": "pnpm@12.14.0"
 }
