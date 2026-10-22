@@ -372,7 +372,14 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
 
   const years = getYears(viewName);
   const lastYear = years.at(-1) as number;
-  const [year, setYear] = React.useState<number>(lastYear);
+  let [year, setYear] = React.useState<number>(lastYear);
+  if (!(years as number[]).includes(year)) {
+    // Ensuring current year is actually within the year range of the current view
+    year = Math.max(
+      Math.min(...years as number[]),
+      Math.min(year, Math.max(...years as number[]))
+    );
+  }
 
   const demographyAvailable = new Set(
     Object.keys(analyse.data.data.demografi[lastYear]),
