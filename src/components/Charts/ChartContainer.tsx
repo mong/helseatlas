@@ -162,7 +162,7 @@ function YearSelectorSlider({
               onClick={() => {
                 setAnimating(true);
                 let currentYear =
-                  lastYear === year ? Math.min(...(years as number[])) - 1 : year;
+                  lastYear === year ? Math.min(...years) - 1 : year;
                 (function loop() {
                   setTimeout(
                     () => {
@@ -188,7 +188,7 @@ function YearSelectorSlider({
             track={false}
             value={year}
             step={1}
-            min={Math.min(...(years as number[]))}
+            min={Math.min(...years)}
             max={lastYear}
             onChange={(_, value) => setYear(value as number)}
             valueLabelFormat={(value) =>
@@ -333,6 +333,17 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
     () => Object.fromEntries(analyse.data.views.map((v) => [v.name, v])),
     [analyse],
   );
+
+  const viewYears = Object.fromEntries(
+    analyse.data.views.map((v) => {
+      const year_range = v.year_range;
+      return [v.name, Array.from(
+        { length: year_range[1] - year_range[0] + 1 },
+        (_, i) => year_range[0] + i,
+      )];
+    })
+  )
+
   const [viewName, setViewName] = React.useState("total");
   const currentView = views[viewName];
 
@@ -352,33 +363,20 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
     new Selection({ region: new Set([]), sykehus: new Set([]) }),
   );
 
-  const getYears = (viewName: string) => {
-    const year_range = (
-      analyse.data.views.find(
-        (v) =>
-          v.name === (viewName === "demografi" ? "total" : viewName),
-      ) as Analyser["data"]["views"][0]
-    ).year_range;
-
-    return !year_range?.length
-      ? ["NA"]
-      : Array.from(
-        { length: year_range[1] - year_range[0] + 1 },
-        (_, i) => year_range[0] + i,
-      );
-  };
+  const getYears = (viewName: string) =>
+    viewYears[viewName === "demografi" ? "total" : viewName];
 
   const kategori = getCategory(analyse.data, nynorsk);
 
   const years = getYears(viewName);
   const lastYear = years.at(-1) as number;
-  let [year, setYear] = React.useState<number>(lastYear);
-  if (!(years as number[]).includes(year)) {
+  const [year, setYear] = React.useState<number>(lastYear);
+  if (!years.includes(year)) {
     // Ensuring current year is actually within the year range of the current view
-    year = Math.max(
-      Math.min(...years as number[]),
-      Math.min(year, Math.max(...years as number[]))
-    );
+    setYear(Math.max(
+      Math.min(...years),
+      Math.min(year, Math.max(...years))
+    ));
   }
 
   const demographyAvailable = new Set(
@@ -692,7 +690,7 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
 
                       </div>
                       <YearSelectorDropdown
-                        years={years as number[]}
+                        years={years}
                         lastYear={lastYear}
                         year={year}
                         setYear={setYear}
@@ -706,7 +704,7 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
                     </div>
                   </div>
                   <YearSelectorSlider
-                    years={years as number[]}
+                    years={years}
                     lastYear={lastYear}
                     year={year}
                     setYear={setYear}
@@ -808,7 +806,7 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
                 >
                   <AnalyseLineChart
                     analyse={analyse.data}
-                    years={years as number[]}
+                    years={viewYears[tidstrendVariable.viewName]}
                     level={level}
                     categoryFmt={(category) => getAreaName(category, lang, nynorsk)}
                     valueFmt={(v) =>
@@ -891,7 +889,7 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
                   </ToggleButtonGroup>
                   {!allYears && <YearSelectorDropdown
                     className="block sm:hidden"
-                    years={years as number[]}
+                    years={years}
                     lastYear={lastYear}
                     year={year}
                     setYear={setYear}
@@ -904,7 +902,7 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
                 </div>
               </div>
               {!allYears && <YearSelectorSlider
-                years={years as number[]}
+                years={years}
                 lastYear={lastYear}
                 year={year}
                 setYear={setYear}
@@ -934,7 +932,7 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
                 andel={demographyAndel}
                 lang={lang}
                 year={allYears ? "all_years" : year}
-                years={years as number[]}
+                years={years}
               />
             </ScreenshotBox>
           </TabPanel>
