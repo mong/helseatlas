@@ -23,7 +23,7 @@
     "@mui/material": "9.5.0",
     "@mui/material-nextjs": "^9.4.0",
     "@mui/system": "9.5.0",
-    "@mui/x-charts": "9.15.0",
+    "@mui/x-charts": "9.16.0",
     "@payloadcms/db-postgres": "^3.90.2",
     "@payloadcms/live-preview-react": "^3.90.2",
     "@payloadcms/next": "^3.90.2",
@@ -53,7 +53,7 @@
     "d3-shape": "3.2.0",
     "graphql": "17.0.2",
     "json-schema": "0.4.0",
-    "next": "16.4.2",
+    "next": "16.4.3",
     "payload": "^3.90.2",
     "postcss": "8.5.31",
     "react": "19.3.1",
@@ -76,7 +76,7 @@
     "dotenv-cli": "^11.0.0",
     "eslint": "10.13.0",
     "typescript": "7.0.2",
-    "typescript-eslint": "8.71.2"
+    "typescript-eslint": "8.72.0"
   },
-  "packageManager": "pnpm@12.14.0"
+  "packageManager": "pnpm@12.15.0"
 }
