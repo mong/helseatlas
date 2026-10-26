@@ -379,8 +379,13 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
     ));
   }
 
+  const demographyYears = getYears(demografiVariable.viewName);
+  const demographyYear = demographyYears.includes(year)
+    ? year
+    : Math.max(Math.min(...demographyYears), Math.min(year, Math.max(...demographyYears)));
+
   const demographyAvailable = new Set(
-    Object.keys(analyse.data.data.demografi[lastYear]),
+    getYears("total").map((year) => Object.keys(analyse.data.data.demografi[year])).flat(),
   ).difference(new Set(["population"]));
 
   const maxValues = React.useMemo(() => {
@@ -889,9 +894,9 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
                   </ToggleButtonGroup>
                   {!allYears && <YearSelectorDropdown
                     className="block sm:hidden"
-                    years={years}
-                    lastYear={lastYear}
-                    year={year}
+                    years={demographyYears}
+                    lastYear={demographyYears.at(-1) as number}
+                    year={demographyYear}
                     setYear={setYear}
                     dict={dict}
                     speed={1000}
@@ -902,9 +907,9 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
                 </div>
               </div>
               {!allYears && <YearSelectorSlider
-                years={years}
-                lastYear={lastYear}
-                year={year}
+                years={demographyYears}
+                lastYear={demographyYears.at(-1) as number}
+                year={demographyYear}
                 setYear={setYear}
                 dict={dict}
                 speed={600}
@@ -931,8 +936,8 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
                 variable={demografiVariable}
                 andel={demographyAndel}
                 lang={lang}
-                year={allYears ? "all_years" : year}
-                years={years}
+                year={allYears ? "all_years" : demographyYear}
+                years={demographyYears}
               />
             </ScreenshotBox>
           </TabPanel>
