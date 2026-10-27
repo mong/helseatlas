@@ -371,7 +371,7 @@ export function ChartContainer({ analyse, lang, dict, nynorsk = false }: ChartCo
   const years = getYears(viewName);
   const lastYear = years.at(-1) as number;
   const [year, setYear] = React.useState<number>(lastYear);
-  if (!years.includes(year)) {
+  if (mainTab === "analyse" && !years.includes(year)) {
     // Ensuring current year is actually within the year range of the current view
     setYear(Math.max(
       Math.min(...years),
