@@ -32,6 +32,9 @@ import {
 } from "@mui/material";
 import { snapdom } from "@zumer/snapdom";
 import React, { JSX, PropsWithChildren } from "react";
+import { AnalyseBarChart } from "@/components/Charts/AnalyseBarChart";
+import AnalyseDemography from "@/components/Charts/AnalyseDemography";
+import { AnalyseLineChart } from "@/components/Charts/AnalyseLineChart";
 import downloadJSON from "@/lib/downloadJSON";
 import {
 	capitalize,
@@ -41,17 +44,13 @@ import {
 	getVariableText,
 } from "@/lib/helpers";
 import { getAreaName, hospitalStructure, Selection } from "@/lib/selection";
-import { Analyser } from "@/payload-types";
 import { Lang } from "@/types";
-import { AnalyseBarChart } from "./AnalyseBarChart";
-import AnalyseDemography from "./AnalyseDemography";
-import { AnalyseLineChart } from "./AnalyseLineChart";
 
 const BACKGROUND_COLOR = "white";
 
 type VariableSelectorProps = {
-	analyse: Analyser["data"];
-	views: Analyser["data"]["views"];
+	analyse: AnalyserPocMock["data"];
+	views: AnalyserPocMock["data"]["views"];
 	dict: { [k: string]: { [k: string]: string } };
 	variable: { viewName: string; name: string };
 	onClick: ({ viewName, name }: { viewName: string; name: string }) => void;
@@ -295,20 +294,112 @@ const MyTabList = styled(TabList)({
 	},
 	["& .MuiTabs-indicator"]: { display: "flex" },
 });
-
-export type ChartContainerProps = {
-	analyse: Analyser;
+export interface AnalyserPocMock {
+	id: number;
+	title: string;
+	data: {
+		name: string;
+		/**
+		 * @minItems 2
+		 * @maxItems 2
+		 */
+		age_range: [number, number];
+		kjonn: "begge" | "menn" | "kvinner";
+		kontakt_begrep?: {
+			en: string;
+			no: string;
+		};
+		kategori_begrep?: {
+			en: string;
+			no: string;
+		};
+		description: {
+			en: string;
+			no: string;
+		};
+		generated: number;
+		views: {
+			name: string;
+			type: string;
+			aggregering: "kont" | "pas" | "begge";
+			/**
+			 * @minItems 2
+			 * @maxItems 2
+			 */
+			year_range: [number, number];
+			title: {
+				en: string;
+				no: string;
+			};
+			/**
+			 * @minItems 1
+			 */
+			variables: [
+				{
+					en: string;
+					no: string;
+					name: string;
+				},
+				...{
+					en: string;
+					no: string;
+					name: string;
+				}[],
+			];
+		}[];
+		data: {
+			/**
+			 * This interface was referenced by `undefined`'s JSON-Schema definition
+			 * via the `patternProperty` ".*".
+			 */
+			[k: string]: {
+				/**
+				 * This interface was referenced by `undefined`'s JSON-Schema definition
+				 * via the `patternProperty` ".*".
+				 */
+				[k: string]: {
+					/**
+					 * This interface was referenced by `undefined`'s JSON-Schema definition
+					 * via the `patternProperty` ".*".
+					 */
+					[k: string]: {
+						/**
+						 * This interface was referenced by `undefined`'s JSON-Schema definition
+						 * via the `patternProperty` ".*".
+						 */
+						[k: string]: {
+							/**
+							 * This interface was referenced by `undefined`'s JSON-Schema definition
+							 * via the `patternProperty` ".*".
+							 */
+							[k: string]: {
+								/**
+								 * This interface was referenced by `undefined`'s JSON-Schema definition
+								 * via the `patternProperty` ".*".
+								 */
+								[k: string]: number;
+							};
+						};
+					};
+				};
+			};
+		};
+		[k: string]: unknown;
+	};
+}
+export type ChartContainerPocMockProps = {
+	analyse: AnalyserPocMock;
 	lang: Lang;
 	dict: { [k: string]: { [k: string]: string } };
 	nynorsk: boolean;
 };
 
-export function ChartContainer({
+export function ChartContainerPocMock({
 	analyse,
 	lang,
 	dict,
 	nynorsk = false,
-}: ChartContainerProps) {
+}: ChartContainerPocMockProps) {
 	const [showNorway, setShowNorway] = React.useState(false);
 	const [verdiType, setVerdiType] = React.useState<"rate" | "n">("rate");
 
