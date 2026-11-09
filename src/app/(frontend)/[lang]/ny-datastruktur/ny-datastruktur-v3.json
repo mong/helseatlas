@@ -1,0 +1,494 @@
+{
+  "categoryTypes": [
+    {
+      "id": "borhf",
+      "label": {
+        "en": "Region",
+        "no": "Region"
+      },
+      "categories": [
+        {
+          "id": "helse_nord",
+          "label": {
+            "en": "Helse Nord",
+            "no": "Helse Nord"
+          }
+        },
+        {
+          "id": "helse_midt_norge",
+          "label": {
+            "en": "Helse Midt-Norge",
+            "no": "Helse Midt-Norge"
+          }
+        },
+        {
+          "id": "helse_vest",
+          "label": {
+            "en": "Helse Vest",
+            "no": "Helse Vest"
+          }
+        },
+        {
+          "id": "helse_sor_ost",
+          "label": {
+            "en": "Helse Sør-Øst",
+            "no": "Helse Sør-Øst"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bohf",
+      "label": {
+        "en": "Hospital",
+        "no": "Sykehus"
+      },
+      "categories": [
+        {
+          "id": "finnmarkssykehuset",
+          "label": {
+            "en": "Finnmarkssykehuset",
+            "no": "Finnmarkssykehuset"
+          },
+          "parent": {
+            "categoryTypeId": "borhf",
+            "categoryId": "helse_nord"
+          }
+        },
+        {
+          "id": "unn",
+          "label": {
+            "en": "Universitetssykehuset Nord-Norge",
+            "no": "Universitetssykehuset Nord-Norge"
+          },
+          "parent": {
+            "categoryTypeId": "borhf",
+            "categoryId": "helse_nord"
+          }
+        },
+        {
+          "id": "helse_more_og_romsdal",
+          "label": {
+            "en": "Helse Møre og Romsdal",
+            "no": "Helse Møre og Romsdal"
+          },
+          "parent": {
+            "categoryTypeId": "borhf",
+            "categoryId": "helse_midt_norge"
+          }
+        },
+        {
+          "id": "st_olavs_hospital",
+          "label": {
+            "en": "St. Olavs hospital",
+            "no": "St. Olavs hospital"
+          },
+          "parent": {
+            "categoryTypeId": "borhf",
+            "categoryId": "helse_midt_norge"
+          }
+        },
+        {
+          "id": "helse_bergen",
+          "label": {
+            "en": "Helse Bergen",
+            "no": "Helse Bergen"
+          },
+          "parent": {
+            "categoryTypeId": "borhf",
+            "categoryId": "helse_vest"
+          }
+        },
+        {
+          "id": "helse_stavanger",
+          "label": {
+            "en": "Helse Stavanger",
+            "no": "Helse Stavanger"
+          },
+          "parent": {
+            "categoryTypeId": "borhf",
+            "categoryId": "helse_vest"
+          }
+        },
+        {
+          "id": "ahus",
+          "label": {
+            "en": "Akershus universitetssykehus",
+            "no": "Akershus universitetssykehus"
+          },
+          "parent": {
+            "categoryTypeId": "borhf",
+            "categoryId": "helse_sor_ost"
+          }
+        },
+        {
+          "id": "ous",
+          "label": {
+            "en": "Oslo universitetssykehus",
+            "no": "Oslo universitetssykehus"
+          },
+          "parent": {
+            "categoryTypeId": "borhf",
+            "categoryId": "helse_sor_ost"
+          }
+        }
+      ]
+    }
+  ],
+  "views": [
+    {
+      "id": "total",
+      "type": "barchart",
+      "label": {
+        "no": "Total",
+        "en": "Total"
+      },
+      "categoryTypes": [
+        "bohf",
+        "borhf"
+      ],
+      "dimensions": [
+        {
+          "dimensionId": "year",
+          "tidstrend": true
+        },
+        {
+          "dimensionId": "rate_eller_antall"
+        },
+        {
+          "dimensionId": "aldersgruppe",
+          "allowedValues": [
+            "0-17",
+            "18-64",
+            "65+"
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "id": "total",
+          "label": {
+            "no": "Total",
+            "en": "Total"
+          }
+        }
+      ]
+    },
+    {
+      "id": "behandler",
+      "type": "barchart",
+      "label": {
+        "no": "Behandler",
+        "en": "Public/private"
+      },
+      "categoryTypes": [
+        "bohf",
+        "borhf"
+      ],
+      "dimensions": [
+        {
+          "dimensionId": "year",
+          "allowedRange": [
+            2023,
+            2024
+          ],
+          "tidstrend": true
+        },
+        {
+          "dimensionId": "rate_eller_antall"
+        },
+        {
+          "dimensionId": "aldersgruppe",
+          "allowedValues": [
+            "0-17",
+            "18-64"
+          ]
+        }
+      ],
+      "breakdownOf": {
+        "viewId": "total",
+        "variableId": "total"
+      },
+      "variables": [
+        {
+          "id": "eget_hf",
+          "label": {
+            "no": "Eget HF",
+            "en": "Own Hospital Trust"
+          }
+        },
+        {
+          "id": "annet_hf",
+          "label": {
+            "no": "Annet HF",
+            "en": "Other Hospital Trust"
+          }
+        },
+        {
+          "id": "privat",
+          "label": {
+            "no": "Privat",
+            "en": "Private"
+          }
+        }
+      ]
+    }
+  ],
+  "dimensions": [
+    {
+      "id": "year",
+      "type": "number",
+      "range": [
+        2020,
+        2024
+      ],
+      "default": 2024
+    },
+    {
+      "id": "rate_eller_antall",
+      "type": "enum",
+      "default": "rate",
+      "values": [
+        {
+          "id": "rate",
+          "label": {
+            "no": "Rate",
+            "en": "Rate"
+          }
+        },
+        {
+          "id": "antall",
+          "label": {
+            "no": "Antall",
+            "en": "Count"
+          }
+        }
+      ]
+    },
+    {
+      "id": "aldersgruppe",
+      "type": "enum",
+      "values": [
+        {
+          "id": "0-17",
+          "label": {
+            "no": "0-17 år",
+            "en": "0-17 years"
+          }
+        },
+        {
+          "id": "18-64",
+          "label": {
+            "no": "18-64 år",
+            "en": "18-64 years"
+          }
+        },
+        {
+          "id": "65+",
+          "label": {
+            "no": "65+ år",
+            "en": "65+ years"
+          }
+        }
+      ]
+    }
+  ],
+  "observations": {
+    "total": {
+      "bohf": {
+        "unn": [
+          {
+            "year": 2023,
+            "aldersgruppe": "0-17",
+            "rate_eller_antall": "rate",
+            "variables": {
+              "total": 425
+            }
+          },
+          {
+            "year": 2023,
+            "aldersgruppe": "18-64",
+            "rate_eller_antall": "rate",
+            "variables": {
+              "total": 445
+            }
+          },
+          {
+            "year": 2023,
+            "aldersgruppe": "65+",
+            "rate_eller_antall": "rate",
+            "variables": {
+              "total": 460
+            }
+          },
+          {
+            "year": 2023,
+            "aldersgruppe": "0-17",
+            "rate_eller_antall": "antall",
+            "variables": {
+              "total": 4255
+            }
+          },
+          {
+            "year": 2023,
+            "aldersgruppe": "18-64",
+            "rate_eller_antall": "antall",
+            "variables": {
+              "total": 9445
+            }
+          },
+          {
+            "year": 2023,
+            "aldersgruppe": "65+",
+            "rate_eller_antall": "antall",
+            "variables": {
+              "total": 9460
+            }
+          }
+        ]
+      },
+      "borhf": {
+        "helse_nord": [
+          {
+            "year": 2023,
+            "aldersgruppe": "0-17",
+            "rate_eller_antall": "rate",
+            "variables": {
+              "total": 425
+            }
+          },
+          {
+            "year": 2023,
+            "aldersgruppe": "18-64",
+            "rate_eller_antall": "rate",
+            "variables": {
+              "total": 445
+            }
+          },
+          {
+            "year": 2023,
+            "aldersgruppe": "65+",
+            "rate_eller_antall": "rate",
+            "variables": {
+              "total": 460
+            }
+          },
+          {
+            "year": 2023,
+            "aldersgruppe": "0-17",
+            "rate_eller_antall": "antall",
+            "variables": {
+              "total": 4255
+            }
+          },
+          {
+            "year": 2023,
+            "aldersgruppe": "18-64",
+            "rate_eller_antall": "antall",
+            "variables": {
+              "total": 9445
+            }
+          },
+          {
+            "year": 2023,
+            "aldersgruppe": "65+",
+            "rate_eller_antall": "antall",
+            "variables": {
+              "total": 9460
+            }
+          }
+        ]
+      }
+    },
+    "behandler": {
+      "bohf": {
+        "unn": [
+          {
+            "year": 2023,
+            "aldersgruppe": "0-17",
+            "rate_eller_antall": "rate",
+            "variables": {
+              "eget_hf": 42,
+              "annet_hf": 342,
+              "privat": 41
+            }
+          },
+          {
+            "year": 2023,
+            "aldersgruppe": "18-64",
+            "rate_eller_antall": "rate",
+            "variables": {
+              "eget_hf": 45,
+              "annet_hf": 350,
+              "privat": 50
+            }
+          },
+          {
+            "year": 2023,
+            "aldersgruppe": "0-17",
+            "rate_eller_antall": "antall",
+            "variables": {
+              "eget_hf": 421,
+              "annet_hf": 3422,
+              "privat": 412
+            }
+          },
+          {
+            "year": 2023,
+            "aldersgruppe": "18-64",
+            "rate_eller_antall": "antall",
+            "variables": {
+              "eget_hf": 245,
+              "annet_hf": 3560,
+              "privat": 5540
+            }
+          }
+        ]
+      },
+      "borhf": {
+        "helse_nord": [
+          {
+            "year": 2023,
+            "aldersgruppe": "0-17",
+            "rate_eller_antall": "rate",
+            "variables": {
+              "eget_hf": 462,
+              "annet_hf": 3422,
+              "privat": 41
+            }
+          },
+          {
+            "year": 2023,
+            "aldersgruppe": "18-64",
+            "rate_eller_antall": "rate",
+            "variables": {
+              "eget_hf": 245,
+              "annet_hf": 3560,
+              "privat": 550
+            }
+          },
+          {
+            "year": 2023,
+            "aldersgruppe": "0-17",
+            "rate_eller_antall": "antall",
+            "variables": {
+              "eget_hf": 4620,
+              "annet_hf": 34220,
+              "privat": 410
+            }
+          },
+          {
+            "year": 2023,
+            "aldersgruppe": "18-64",
+            "rate_eller_antall": "antall",
+            "variables": {
+              "eget_hf": 2450,
+              "annet_hf": 35600,
+              "privat": 5500
+            }
+          }
+        ]
+      }
+    }
+  }
+}
