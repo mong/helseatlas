@@ -56,6 +56,10 @@
           "label": {
             "no": "Akershus",
             "en": "Akershus"
+          },
+          "parent": {
+            "categoryType": "region",
+            "category": "helse-srst"
           }
         },
         {
@@ -63,6 +67,10 @@
           "label": {
             "no": "Bergen",
             "en": "Bergen"
+          },
+          "parent": {
+            "categoryType": "region",
+            "category": "helse-vest"
           }
         },
         {
@@ -70,6 +78,10 @@
           "label": {
             "no": "Diakonhjemmet",
             "en": "Diakonhjemmet"
+          },
+          "parent": {
+            "categoryType": "region",
+            "category": "helse-srst"
           }
         },
         {
@@ -77,6 +89,10 @@
           "label": {
             "no": "Finnmark",
             "en": "Finnmark"
+          },
+          "parent": {
+            "categoryType": "region",
+            "category": "helse-nord"
           }
         },
         {
@@ -84,6 +100,10 @@
           "label": {
             "no": "Fonna",
             "en": "Fonna"
+          },
+          "parent": {
+            "categoryType": "region",
+            "category": "helse-vest"
           }
         },
         {
@@ -91,6 +111,10 @@
           "label": {
             "no": "Førde",
             "en": "Førde"
+          },
+          "parent": {
+            "categoryType": "region",
+            "category": "helse-vest"
           }
         },
         {
@@ -98,6 +122,10 @@
           "label": {
             "no": "Helgeland",
             "en": "Helgeland"
+          },
+          "parent": {
+            "categoryType": "region",
+            "category": "helse-nord"
           }
         },
         {
@@ -105,6 +133,10 @@
           "label": {
             "no": "Innlandet",
             "en": "Innlandet"
+          },
+          "parent": {
+            "categoryType": "region",
+            "category": "helse-srst"
           }
         },
         {
@@ -112,6 +144,10 @@
           "label": {
             "no": "Lovisenberg",
             "en": "Lovisenberg"
+          },
+          "parent": {
+            "categoryType": "region",
+            "category": "helse-srst"
           }
         },
         {
@@ -119,6 +155,10 @@
           "label": {
             "no": "Møre_og_Romsdal",
             "en": "Møre_og_Romsdal"
+          },
+          "parent": {
+            "categoryType": "region",
+            "category": "helse-vest"
           }
         },
         {
@@ -126,6 +166,10 @@
           "label": {
             "no": "NordTrøndelag",
             "en": "NordTrøndelag"
+          },
+          "parent": {
+            "categoryType": "region",
+            "category": "helse-nord"
           }
         },
         {
@@ -133,6 +177,10 @@
           "label": {
             "no": "Nordland",
             "en": "Nordland"
+          },
+          "parent": {
+            "categoryType": "region",
+            "category": "helse-nord"
           }
         },
         {
@@ -147,6 +195,10 @@
           "label": {
             "no": "OUS",
             "en": "OUS"
+          },
+          "parent": {
+            "categoryType": "region",
+            "category": "helse-srst"
           }
         },
         {
@@ -154,6 +206,10 @@
           "label": {
             "no": "St_Olav",
             "en": "St_Olav"
+          },
+          "parent": {
+            "categoryType": "region",
+            "category": "helse-midt"
           }
         },
         {
@@ -161,6 +217,10 @@
           "label": {
             "no": "Stavanger",
             "en": "Stavanger"
+          },
+          "parent": {
+            "categoryType": "region",
+            "category": "helse-vest"
           }
         },
         {
@@ -168,6 +228,10 @@
           "label": {
             "no": "Sørlandet",
             "en": "Sørlandet"
+          },
+          "parent": {
+            "categoryType": "region",
+            "category": "helse-srst"
           }
         },
         {
@@ -175,6 +239,10 @@
           "label": {
             "no": "Telemark",
             "en": "Telemark"
+          },
+          "parent": {
+            "categoryType": "region",
+            "category": "helse-srst"
           }
         },
         {
@@ -182,6 +250,10 @@
           "label": {
             "no": "UNN",
             "en": "UNN"
+          },
+          "parent": {
+            "categoryType": "region",
+            "category": "helse-nord"
           }
         },
         {
@@ -189,6 +261,10 @@
           "label": {
             "no": "Vestfold",
             "en": "Vestfold"
+          },
+          "parent": {
+            "categoryType": "region",
+            "category": "helse-srst"
           }
         },
         {
@@ -196,6 +272,10 @@
           "label": {
             "no": "Vestre_Viken",
             "en": "Vestre_Viken"
+          },
+          "parent": {
+            "categoryType": "region",
+            "category": "helse-srst"
           }
         },
         {
@@ -203,6 +283,10 @@
           "label": {
             "no": "Østfold",
             "en": "Østfold"
+          },
+          "parent": {
+            "categoryType": "region",
+            "category": "helse-srst"
           }
         }
       ]
