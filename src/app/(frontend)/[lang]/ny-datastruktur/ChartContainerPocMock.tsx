@@ -47,7 +47,7 @@ import {
 	getVariableText,
 } from "@/lib/helpers";
 import { getAreaName, hospitalStructure, Selection } from "@/lib/selection";
-import { Tag } from "@/payload-types";
+import { Analyser, Tag } from "@/payload-types";
 import { Lang } from "@/types";
 
 const BACKGROUND_COLOR = "white";
@@ -419,12 +419,41 @@ export type ChartContainerPocMockProps = {
 	nynorsk: boolean;
 };
 
+import analyseNewStructure from "./autisme-barn-new.json";
+import analyseOrgStructure from "./autisme-barn-old.json";
+
 export function ChartContainerPocMock({
-	analyse,
+	// analyse, note: use sample datastructur from file to be independent from parent component.
 	lang,
 	dict,
 	nynorsk = false,
 }: ChartContainerPocMockProps) {
+	// New data-structure
+	const analyseNew: AnalyserPocMock = {
+		id: 1,
+		title: "Autisme barn",
+		author: "SKDE",
+		norskType: "nn",
+		updatedAt: "2024-06-01",
+		createdAt: "2024-01-01",
+		// @ts-expect-error
+		data: analyseNewStructure,
+	};
+	// Original data-structure
+	const analyseOrg: Analyser = {
+		id: 1,
+		name: "Autisme barn",
+		author: "SKDE",
+		norskType: "nn",
+		updatedAt: "2024-06-01",
+		createdAt: "2024-01-01",
+		// @ts-expect-error
+		data: analyseOrgStructure,
+	};
+
+	const analyse = analyseOrg; // Original data for original structure
+	// const analyse = analyseNewFormat; // Data for Refactor to new structure
+
 	const [showNorway, setShowNorway] = React.useState(false);
 	const [verdiType, setVerdiType] = React.useState<"rate" | "n">("rate");
 
