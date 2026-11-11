@@ -477,6 +477,14 @@ export function ChartContainerPocMock({
 
 	const [viewName, setViewName] = React.useState("total");
 	const currentView = views[viewName];
+	const focusViews = analyse.data.views.filter(
+		(view) =>
+			view.type === "standard" &&
+			view.name !== "total" &&
+			["begge", aggregering].includes(view.aggregering),
+	);
+	const analysisViewTab = viewName === "total" ? "analyse" : `view:${viewName}`;
+	const activeMainTab = mainTab === "demografi" ? "demografi" : analysisViewTab;
 
 	const [tidstrendVariable, setTidstrendVariable] = React.useState({
 		viewName: "total",
@@ -810,10 +818,19 @@ export function ChartContainerPocMock({
 				<div className="font-bold">show Norway:</div>
 				<div>{showNorway ? "yes" : "no"};</div>
 			</div>
-			<TabContext value={mainTab}>
+			<TabContext value={activeMainTab}>
 				<MyTabList
-					onChange={(_, value) => setMainTab(value)}
+					onChange={(_, value: string) => {
+						if (value === "demografi") {
+							setMainTab("demografi");
+						} else {
+							setMainTab("analyse");
+							setViewName(value === "analyse" ? "total" : value.slice(5));
+						}
+					}}
 					aria-label="Type datavisning"
+					variant="scrollable"
+					scrollButtons="auto"
 				>
 					<Tab
 						icon={<AssessmentIcon fontSize="small" />}
@@ -829,26 +846,21 @@ export function ChartContainerPocMock({
 						value="demografi"
 						sx={{ textTransform: "none" }}
 					/>
-					<Tab
-						// icon={<GroupsIcon fontSize="small" />}
-						iconPosition="start"
-						label={"behandler (ph)"}
-						value="ph1"
-						sx={{ textTransform: "none" }}
-					/>
-					<Tab
-						// icon={<GroupsIcon fontSize="small" />}
-						iconPosition="start"
-						label={"sektor (ph)"}
-						value="ph2"
-						sx={{ textTransform: "none" }}
-					/>
+					{focusViews.map((view) => (
+						<Tab
+							key={view.name}
+							label={view.title[lang]}
+							value={`view:${view.name}`}
+							sx={{ textTransform: "none" }}
+						/>
+					))}
 				</MyTabList>
 				<Paper
 					sx={{ background: BACKGROUND_COLOR, borderRadius: "0px 0px 8px 8px" }}
 					elevation={2}
 				>
-					<TabPanel value="analyse" sx={{ paddingX: 0, paddingBottom: 0 }}>
+					{/* Analyse tab */}
+					<TabPanel value={analysisViewTab} sx={{ paddingX: 0, paddingBottom: 0 }}>
 						{areaAndAggregationSelect}
 						<TabContext value={analyseTab}>
 							<Box
@@ -881,40 +893,6 @@ export function ChartContainerPocMock({
 								<div className="px-4 sm:px-8">
 									<div className="flex gap-4">
 										<div className="flex flex-wrap gap-4 gap-y-2 mb-4">
-											<div className="w-45 sm:w-55 md:w-62.5">
-												Fokusområde dropdown (should be tab)
-												<Dropdown
-													removeAll={dict.analysebox.remove_choice}
-													items={{
-														groups: [
-															{
-																items: analyse.data.views
-																	.filter(
-																		(v) =>
-																			v.type === "standard" &&
-																			v.name !== "total" &&
-																			["begge", aggregering].includes(
-																				v.aggregering,
-																			),
-																	)
-																	.map((view) => ({
-																		label: view.title[lang],
-																		value: view.name,
-																	})),
-															},
-														],
-													}}
-													onChange={(e) => {
-														setViewName(
-															e.target.value === ""
-																? "total"
-																: (e.target.value as string),
-														);
-													}}
-													placeholder={dict.analysebox.choose_focus_area}
-													value={viewName === "total" ? "" : viewName}
-												/>
-											</div>
 											<YearSelectorDropdown
 												years={years}
 												lastYear={lastYear}
@@ -1093,6 +1071,7 @@ export function ChartContainerPocMock({
 						</TabContext>
 					</TabPanel>
 
+					{/* Demografi tab */}
 					<TabPanel value="demografi" sx={{ paddingX: 0, paddingBottom: 0 }}>
 						<div className="px-4 sm:px-8">
 							<div className="flex gap-4">

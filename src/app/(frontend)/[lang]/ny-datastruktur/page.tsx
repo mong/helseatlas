@@ -24,7 +24,7 @@ import RichText from "@/components/RichText";
 import TagList from "@/components/TagList";
 import dict from "@/dictionaries/no.json";
 import { Analyser } from "@/payload-types";
-import analyseNew from "./autisme-barn.json";
+import analyseNew from "./autisme-barn-new.json";
 import analyseOld from "./autisme-barn-old.json";
 
 const jsonTreeTheme = {
