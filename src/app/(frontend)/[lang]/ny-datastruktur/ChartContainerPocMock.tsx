@@ -9,8 +9,10 @@ import {
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import CloseIcon from "@mui/icons-material/Close";
+import DomainAddIcon from "@mui/icons-material/DomainAdd";
 import GroupsIcon from "@mui/icons-material/Groups";
 import InsightsIcon from "@mui/icons-material/InsightsOutlined";
+import MedicalInformationIcon from "@mui/icons-material/MedicalInformation";
 import PauseIcon from "@mui/icons-material/Pause";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import TabContext from "@mui/lab/TabContext";
@@ -848,6 +850,15 @@ export function ChartContainerPocMock({
 					/>
 					{focusViews.map((view) => (
 						<Tab
+							icon={
+								// TODO: Replace with mapping function based on view.name to select appropriate icon
+								view.name === "behandler" ? (
+									<DomainAddIcon fontSize="small" />
+								) : (
+									<MedicalInformationIcon fontSize="small" />
+								)
+							}
+							iconPosition="start"
 							key={view.name}
 							label={view.title[lang]}
 							value={`view:${view.name}`}
@@ -860,7 +871,10 @@ export function ChartContainerPocMock({
 					elevation={2}
 				>
 					{/* Analyse tab */}
-					<TabPanel value={analysisViewTab} sx={{ paddingX: 0, paddingBottom: 0 }}>
+					<TabPanel
+						value={analysisViewTab}
+						sx={{ paddingX: 0, paddingBottom: 0 }}
+					>
 						{areaAndAggregationSelect}
 						<TabContext value={analyseTab}>
 							<Box
