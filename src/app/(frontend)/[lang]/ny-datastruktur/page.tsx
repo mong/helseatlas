@@ -9,11 +9,7 @@ import {
 } from "@mong/material-ui";
 import { Alert, CircularProgress } from "@mui/material";
 import { cache, Suspense } from "react";
-import {
-	type Base16Theme,
-	JSONTree,
-	type StylingConfig,
-} from "react-json-tree";
+import { JSONTree } from "react-json-tree";
 import {
 	AnalyserPocMock,
 	ChartContainerPocMock,
@@ -23,7 +19,6 @@ import { MaxWidth } from "@/components/MaxWidth";
 import RichText from "@/components/RichText";
 import TagList from "@/components/TagList";
 import dict from "@/dictionaries/no.json";
-import { Analyser } from "@/payload-types";
 import analyseNew from "./autisme-barn-new.json";
 import analyseOld from "./autisme-barn-old.json";
 
@@ -52,20 +47,7 @@ export default function NyDatastrukturPage() {
 		norskType: "nn",
 		updatedAt: "2024-06-01",
 		createdAt: "2024-01-01",
-		// @ts-expect-error
 		data: analyseNew,
-		// data: analyseOld,
-	};
-	const analyseOrgFormat: Analyser = {
-		id: 1,
-		name: "Autisme barn",
-		author: "SKDE",
-		norskType: "nn",
-		updatedAt: "2024-06-01",
-		createdAt: "2024-01-01",
-		// data: analyseNew,
-		// @ts-expect-error
-		data: analyseOld,
 	};
 	// const dict = getDictionary("nn");
 
@@ -147,7 +129,7 @@ export default function NyDatastrukturPage() {
 							<MaxWidth size="medium">
 								<ChartContainerPocMock
 									key={"hashlotsofdata"} // Providing key to update state when new files are uploaded in preview
-									analyse={analyseOrgFormat}
+									analyse={analyseNewFormat}
 									lang={"no"}
 									dict={dict}
 									nynorsk={false}

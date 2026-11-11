@@ -1,11 +1,6 @@
 "use client";
 
-import {
-	Dropdown,
-	SplitButton,
-	ToggleButton,
-	ToggleButtonGroup,
-} from "@mong/material-ui";
+import { Dropdown, SplitButton } from "@mong/material-ui";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import CloseIcon from "@mui/icons-material/Close";
@@ -19,906 +14,468 @@ import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import {
+	Alert,
 	Box,
 	FormControlLabel,
 	IconButton,
 	Paper,
-	Slide,
 	Slider,
 	Snackbar,
 	Stack,
 	Switch,
 	styled,
 	Tab,
+	Tabs,
+	ToggleButton,
+	ToggleButtonGroup,
 	Typography,
 } from "@mui/material";
+import { LineChart } from "@mui/x-charts/LineChart";
 import { snapdom } from "@zumer/snapdom";
-import React, { JSX, PropsWithChildren } from "react";
+import React from "react";
 import { JSONTree } from "react-json-tree";
 import { AnalyseBarChart } from "@/components/Charts/AnalyseBarChart";
-import AnalyseDemography from "@/components/Charts/AnalyseDemography";
-import { AnalyseLineChart } from "@/components/Charts/AnalyseLineChart";
-import downloadJSON from "@/lib/downloadJSON";
+import { formatNumber } from "@/lib/helpers";
+import type { Lang } from "@/types";
 import {
-	capitalize,
-	formatNumber,
-	getCategory,
-	getDescription,
-	getVariableText,
-} from "@/lib/helpers";
-import { getAreaName, hospitalStructure, Selection } from "@/lib/selection";
-import { Analyser, Tag } from "@/payload-types";
-import { Lang } from "@/types";
+	type AnalysisData,
+	type DimensionValues,
+	type View,
+	getBarRows,
+	getCategoryType,
+	getDemographyRows,
+	getDimension,
+	getDimensionValues,
+	getEnumDimensions,
+	getTrendRows,
+	getView,
+	getYears,
+} from "./chartData";
 
-const BACKGROUND_COLOR = "white";
-
-type VariableSelectorProps = {
-	analyse: AnalyserPocMock["data"];
-	views: AnalyserPocMock["data"]["views"];
-	dict: { [k: string]: { [k: string]: string } };
-	variable: { viewName: string; name: string };
-	onClick: ({ viewName, name }: { viewName: string; name: string }) => void;
-	lang: Lang;
-	defaultText?: string;
-};
-
-function VariableSelector({
-	analyse,
-	views,
-	dict,
-	variable,
-	onClick,
-	lang,
-}: VariableSelectorProps) {
-	return (
-		views.length > 0 && (
-			<div className="w-45 sm:w-55 md:w-62.5">
-				<Dropdown
-					removeAll={dict.analysebox.remove_choice}
-					items={{
-						groups: views.map((v) => ({
-							groupLabel: v.title[lang],
-							items: v.variables.map((variable) => ({
-								label: variable[lang],
-								value: `${v.name}.${variable.name}`,
-							})),
-						})),
-					}}
-					onChange={(e) => {
-						const [viewName, name] =
-							e.target.value === ""
-								? ["total", analyse.name]
-								: (e.target.value as string).split(".");
-						onClick({ viewName, name });
-					}}
-					placeholder={dict.analysebox.choose_variable}
-					value={
-						variable.viewName === "total"
-							? ""
-							: (`${variable.viewName}.${variable.name}` as string)
-					}
-				/>
-			</div>
-		)
-	);
+export interface AnalyserPocMock {
+	id: number;
+	title: string;
+	author: "SKDE" | "Helse Førde";
+	norskType: "nb" | "nn";
+	updatedAt: string;
+	createdAt: string;
+	data: AnalysisData;
 }
 
-type YearSelectorProps = {
-	years: number[];
-	lastYear: number;
-	year: number;
-	setYear: (year: number) => void;
-	dict: { [k: string]: { [k: string]: string } };
-	speed: number;
-	className?: string;
-};
-
-const jsonTreeTheme = {
-	extend: "monokai",
-	tree: {
-		width: "40%",
-		height: "100%",
-		margin: 0,
-		overflow: "auto",
-		padding: "20px",
-	},
-};
-
-function YearSelectorDropdown({
-	years,
-	year,
-	setYear,
-	dict,
-	className,
-}: YearSelectorProps) {
-	return (
-		<div className={className}>
-			<Dropdown
-				items={{
-					groups: [
-						{
-							items: years
-								.toReversed()
-								.map((y) => ({ label: y.toString(), value: y.toString() })),
-						},
-					],
-				}}
-				onChange={(e) => setYear(Number(e.target.value))}
-				placeholder={dict.analysebox.choose_year}
-				value={year.toString()}
-			/>
-		</div>
-	);
-}
-
-function YearSelectorSlider({
-	years,
-	lastYear,
-	year,
-	setYear,
-	dict,
-	speed,
-	className,
-}: YearSelectorProps) {
-	const [animating, setAnimating] = React.useState(false);
-	const animatingRef = React.useRef(false);
-	React.useEffect(() => {
-		animatingRef.current = animating;
-	}, [animating]);
-
-	return (
-		<div className={className}>
-			<Stack direction="row">
-				<Box>
-					{animating ? (
-						<IconButton onClick={() => setAnimating(false)}>
-							<PauseIcon />
-						</IconButton>
-					) : (
-						<IconButton
-							onClick={() => {
-								setAnimating(true);
-								let currentYear =
-									lastYear === year ? Math.min(...years) - 1 : year;
-								(function loop() {
-									setTimeout(() => {
-										if (currentYear < lastYear && animatingRef.current) {
-											currentYear++;
-											setYear(currentYear);
-											loop();
-										} else {
-											setAnimating(false);
-										}
-									}, speed);
-								})();
-							}}
-						>
-							<PlayArrowIcon />
-						</IconButton>
-					)}
-				</Box>
-				<Box sx={{ flexGrow: 1, marginX: 2, marginRight: 4 }}>
-					<Slider
-						track={false}
-						value={year}
-						step={1}
-						min={Math.min(...years)}
-						max={lastYear}
-						onChange={(_, value) => setYear(value as number)}
-						valueLabelFormat={(value) =>
-							value === lastYear + 1
-								? dict.analysebox.all_years
-								: value.toString()
-						}
-						valueLabelDisplay="auto"
-						marks={years
-							.map((year) => ({
-								value: year as number,
-								label: year.toString(),
-							}))
-							.concat({
-								value: lastYear + 1,
-								label: dict.analysebox.all_years,
-							})}
-						sx={{
-							"@media (max-width: 600px)": {
-								"& .MuiSlider-markLabel": {
-									fontSize: "0.75rem",
-								},
-							},
-						}}
-					/>
-				</Box>
-			</Stack>
-		</div>
-	);
-}
-
-type ScreenshotBoxProps = {
+export type ChartContainerPocMockProps = {
 	analyse: AnalyserPocMock;
-	description: JSX.Element;
-	graphRef: React.RefObject<HTMLDivElement | null>;
+	lang: Lang;
+	dict: { [key: string]: { [key: string]: string } };
+	nynorsk?: boolean;
 };
-
-function ScreenshotBox({
-	children,
-	analyse,
-	description,
-	graphRef,
-}: PropsWithChildren<ScreenshotBoxProps>) {
-	return (
-		<div className="px-0 md:px-8" ref={graphRef}>
-			<Box
-				sx={{
-					width: "100%",
-					height: "80vw",
-					maxHeight: "700px",
-					minHeight: "370px",
-					marginTop: 0,
-					position: "sticky",
-				}}
-			>
-				<Box
-					sx={{
-						position: "absolute",
-						right: 0,
-						bottom: 0,
-					}}
-				>
-					<Box
-						component="img"
-						alt={`{analyse.author} logo`}
-						src={
-							analyse.author === "SKDE"
-								? "/img/logo-skde-graa.svg"
-								: "/img/helse-forde-graa.svg"
-						}
-						sx={{
-							width: "15vw",
-							maxWidth: analyse.author === "SKDE" ? 100 : 150,
-							position: "absolute",
-							bottom: 55,
-							right: 30,
-							printColorAdjust: "exact",
-							"@media print": { bottom: 110 },
-						}}
-					/>
-				</Box>
-				{children}
-			</Box>
-			<Box
-				sx={{
-					textAlign: "center",
-					padding: 2,
-					paddingBottom: 3,
-					"@media print": { padding: 0, paddingBottom: 3 },
-				}}
-			>
-				{description}
-			</Box>
-		</div>
-	);
-}
 
 const MyTabList = styled(TabList)({
-	["& .Mui-selected"]: { background: BACKGROUND_COLOR },
-	["& .MuiButtonBase-root"]: {
+	"& .Mui-selected": { background: "white" },
+	"& .MuiButtonBase-root": {
 		minHeight: "unset",
 		height: 48,
 		borderRadius: "8px 8px 0px 0px",
 	},
-	["& .MuiTabs-indicator"]: { display: "flex" },
 });
-export interface AnalyserPocMock {
-	id: number;
-	title: string;
-	publiseringsStatus?: ("published" | "test" | "hidden") | null;
-	publishedAt?: string | null;
-	author: "SKDE" | "Helse Førde";
-	norskType: "nb" | "nn";
-	tags?: (number | Tag)[] | null;
-	slug?: string | null;
-	slugLock?: boolean | null;
-	updatedAt: string;
-	createdAt: string;
-	_status?: ("draft" | "published") | null;
-	data: {
-		name: string;
-		/**
-		 * @minItems 2
-		 * @maxItems 2
-		 */
-		age_range: [number, number];
-		kjonn: "begge" | "menn" | "kvinner";
-		kontakt_begrep?: {
-			en: string;
-			no: string;
-		};
-		kategori_begrep?: {
-			en: string;
-			no: string;
-		};
-		description: {
-			en: string;
-			no: string;
-		};
-		generated: number;
-		views: {
-			name: string;
-			type: string;
-			aggregering: "kont" | "pas" | "begge";
-			/**
-			 * @minItems 2
-			 * @maxItems 2
-			 */
-			year_range: [number, number];
-			title: {
-				en: string;
-				no: string;
-			};
-			/**
-			 * @minItems 1
-			 */
-			variables: [
-				{
-					en: string;
-					no: string;
-					name: string;
-				},
-				...{
-					en: string;
-					no: string;
-					name: string;
-				}[],
-			];
-		}[];
-		data: {
-			/**
-			 * This interface was referenced by `undefined`'s JSON-Schema definition
-			 * via the `patternProperty` ".*".
-			 */
-			[k: string]: {
-				/**
-				 * This interface was referenced by `undefined`'s JSON-Schema definition
-				 * via the `patternProperty` ".*".
-				 */
-				[k: string]: {
-					/**
-					 * This interface was referenced by `undefined`'s JSON-Schema definition
-					 * via the `patternProperty` ".*".
-					 */
-					[k: string]: {
-						/**
-						 * This interface was referenced by `undefined`'s JSON-Schema definition
-						 * via the `patternProperty` ".*".
-						 */
-						[k: string]: {
-							/**
-							 * This interface was referenced by `undefined`'s JSON-Schema definition
-							 * via the `patternProperty` ".*".
-							 */
-							[k: string]: {
-								/**
-								 * This interface was referenced by `undefined`'s JSON-Schema definition
-								 * via the `patternProperty` ".*".
-								 */
-								[k: string]: number;
-							};
-						};
-					};
-				};
-			};
-		};
-		[k: string]: unknown;
-	};
-}
-export type ChartContainerPocMockProps = {
-	analyse: AnalyserPocMock;
-	lang: Lang;
-	dict: { [k: string]: { [k: string]: string } };
-	nynorsk: boolean;
+
+const jsonTreeTheme = {
+	extend: "monokai",
+	tree: { flex: 1, minWidth: 0, margin: 0, overflow: "auto", padding: "20px" },
 };
 
-import analyseNewStructure from "./autisme-barn-new.json";
-import analyseOrgStructure from "./autisme-barn-old.json";
+type YearSelectorProps = {
+	years: number[];
+	year: number;
+	setYear: (year: number) => void;
+	dict: ChartContainerPocMockProps["dict"];
+	lang: Lang;
+};
 
-export function ChartContainerPocMock({
-	// analyse, note: use sample datastructur from file to be independent from parent component.
-	lang,
-	dict,
-	nynorsk = false,
-}: ChartContainerPocMockProps) {
-	// New data-structure
-	const analyseNew: AnalyserPocMock = {
-		id: 1,
-		title: "Autisme barn",
-		author: "SKDE",
-		norskType: "nn",
-		updatedAt: "2024-06-01",
-		createdAt: "2024-01-01",
-		// @ts-expect-error
-		data: analyseNewStructure,
-	};
-	// Original data-structure
-	const analyseOrg: Analyser = {
-		id: 1,
-		name: "Autisme barn",
-		author: "SKDE",
-		norskType: "nn",
-		updatedAt: "2024-06-01",
-		createdAt: "2024-01-01",
-		// @ts-expect-error
-		data: analyseOrgStructure,
-	};
+function YearSelector({ years, year, setYear, dict, lang }: YearSelectorProps) {
+	const [animating, setAnimating] = React.useState(false);
+	const lastYear = years[years.length - 1];
+	React.useEffect(() => {
+		if (!animating) return;
+		const timer = setTimeout(() => {
+			const index = years.indexOf(year);
+			if (index === years.length - 1) setAnimating(false);
+			else setYear(years[index + 1]);
+		}, 600);
+		return () => clearTimeout(timer);
+	}, [animating, year, years, setYear]);
 
-	const analyse = analyseOrg; // Original data for original structure
-	// const analyse = analyseNewFormat; // Data for Refactor to new structure
-
-	const [showNorway, setShowNorway] = React.useState(false);
-	const [verdiType, setVerdiType] = React.useState<"rate" | "n">("rate");
-
-	const [level, setLevel] = React.useState<"region" | "sykehus">("sykehus");
-
-	const aggregeringTypes = analyse.data.views.reduce(
-		(prev, curr) =>
-			prev.union(
-				new Set(
-					curr.aggregering === "begge"
-						? ["kont", "pas"]
-						: [curr.aggregering as "kont" | "pas"],
-				),
-			),
-		new Set<"kont" | "pas">(),
-	);
-
-	const [aggregering, setAggregering] = React.useState<"kont" | "pas">(
-		aggregeringTypes.size === 1
-			? aggregeringTypes.values().next().value!
-			: "kont",
-	);
-	const [mainTab, setMainTab] = React.useState<"analyse" | "demografi">(
-		"analyse",
-	);
-	const [analyseTab, setAnalyseTab] = React.useState<"enkeltår" | "tidstrend">(
-		"enkeltår",
-	);
-	const [allYears, setAllYears] = React.useState(true);
-
-	const views = React.useMemo(
-		() => Object.fromEntries(analyse.data.views.map((v) => [v.name, v])),
-		[analyse],
-	);
-
-	const viewYears = React.useMemo(
-		() =>
-			Object.fromEntries(
-				analyse.data.views.map((v) => {
-					const year_range = v.year_range;
-					return [
-						v.name,
-						Array.from(
-							{ length: year_range[1] - year_range[0] + 1 },
-							(_, i) => year_range[0] + i,
-						),
-					];
-				}),
-			),
-		[analyse.data.views],
-	);
-
-	const [viewName, setViewName] = React.useState("total");
-	const currentView = views[viewName];
-	const focusViews = analyse.data.views.filter(
-		(view) =>
-			view.type === "standard" &&
-			view.name !== "total" &&
-			["begge", aggregering].includes(view.aggregering),
-	);
-	const analysisViewTab = viewName === "total" ? "analyse" : `view:${viewName}`;
-	const activeMainTab = mainTab === "demografi" ? "demografi" : analysisViewTab;
-
-	const [tidstrendVariable, setTidstrendVariable] = React.useState({
-		viewName: "total",
-		name: analyse.data.name,
-	});
-	const [demografiVariable, setDemografiVariable] = React.useState({
-		viewName: "total",
-		name: analyse.data.name,
-	});
-
-	const [showGenders, setShowGenders] = React.useState(true);
-	const [demographyAndel, setDemographyAndel] = React.useState(false);
-
-	const [selection, setSelection] = React.useState(
-		new Selection({ region: new Set([]), sykehus: new Set([]) }),
-	);
-
-	const getYears = React.useCallback(
-		(viewName: string) =>
-			viewYears[viewName === "demografi" ? "total" : viewName],
-		[viewYears],
-	);
-
-	const kategori = getCategory(analyse.data, nynorsk);
-
-	const years = getYears(viewName);
-	const lastYear = years.at(-1) as number;
-	const [year, setYear] = React.useState<number>(lastYear);
-	if (mainTab === "analyse" && !years.includes(year)) {
-		// Ensuring current year is actually within the year range of the current view
-		setYear(Math.max(Math.min(...years), Math.min(year, Math.max(...years))));
-	}
-
-	const demographyYears = getYears(demografiVariable.viewName);
-	const demographyYear = demographyYears.includes(year)
-		? year
-		: Math.max(
-				Math.min(...demographyYears),
-				Math.min(year, Math.max(...demographyYears)),
-			);
-
-	const demographyAvailable = new Set(
-		getYears("total").flatMap((year) =>
-			Object.keys(analyse.data.data.demografi[year]),
-		),
-	).difference(new Set(["population"]));
-
-	const maxValues = React.useMemo(() => {
-		/* Calculates the max for all values accross years and areas (or other categories) */
-		return Object.fromEntries(
-			["demografi", ...analyse.data.views.map((v) => v.name)].map(
-				(viewName) => {
-					const view_years = getYears(viewName);
-					const levels_or_views = Object.keys(
-						analyse.data.data[viewName][view_years[0]],
-					);
-					return [
-						viewName,
-						Object.fromEntries(
-							levels_or_views.map((level_or_view) => {
-								const categories = Object.keys(
-									analyse.data.data[viewName][view_years[0]][level_or_view],
-								);
-								const variables = Object.keys(
-									analyse.data.data[viewName][view_years[0]][level_or_view][
-										categories[0]
-									],
-								);
-								const inflections = Object.keys(
-									analyse.data.data[viewName][view_years[0]][level_or_view][
-										categories[0]
-									][variables[0]],
-								);
-								return [
-									level_or_view,
-									Object.fromEntries(
-										variables.map((variable) => {
-											return [
-												variable,
-												Object.fromEntries(
-													inflections.map((inflection) => [
-														inflection,
-														{
-															all: Math.max(
-																...view_years.flatMap((year) =>
-																	categories.map(
-																		(category) =>
-																			analyse.data.data[viewName][year][
-																				level_or_view
-																			][category][variable][inflection],
-																	),
-																),
-															),
-															withoutNorway: Math.max(
-																...view_years.flatMap((year) =>
-																	categories
-																		.filter((c) => c !== "Norge")
-																		.map(
-																			(category) =>
-																				analyse.data.data[viewName][year][
-																					level_or_view
-																				][category][variable][inflection],
-																		),
-																),
-															),
-														},
-													]),
-												),
-											];
-										}),
-									),
-								];
-							}),
-						),
-					];
-				},
-			),
-		);
-	}, [analyse, getYears]);
-
-	const varNames = React.useMemo(
-		() =>
-			Object.fromEntries(
-				analyse.data.views.flatMap((view) =>
-					view.variables.map((variable) => [variable.name, variable]),
-				),
-			),
-		[analyse],
-	);
-
-	const chooseAreasText =
-		dict.analysebox.choose_area +
-		(selection[level].size ? ` (${selection[level].size})` : "");
-
-	const areaAndAggregationSelect = (
-		<div className="flex flex-wrap gap-4 px-4 sm:px-8 mb-4">
-			Buttons:
-			<div className="w-45 sm:w-55 md:w-62.5">
+	return (
+		<>
+			<div className="block sm:hidden w-45 mb-4">
 				<Dropdown
-					multiple
-					removeAll={dict.analysebox.remove_choice}
 					items={{
-						groups:
-							level === "region"
-								? [
-										{
-											items: Object.keys(hospitalStructure).map((region) => ({
-												label: getAreaName(region, lang, nynorsk),
-												value: region,
-											})),
-										},
-									]
-								: Object.keys(hospitalStructure).map((region) => ({
-										groupLabel: getAreaName(region, lang, nynorsk),
-										items: Array.from(hospitalStructure[region])
-											.toSorted()
-											.map((sykehus) => ({
-												label: getAreaName(sykehus, lang, nynorsk),
-												value: sykehus,
-											})),
-									})),
+						groups: [{
+							items: years.toReversed().map((year) => ({
+								label: String(year),
+								value: String(year),
+							})),
+						}],
 					}}
-					onChange={(e) => {
-						if (e.target.value.length === 0) {
-							setSelection(
-								new Selection({ region: new Set([]), sykehus: new Set([]) }),
-							);
-						} else {
-							const SelectedValue = Array.from(
-								new Set(e.target.value).symmetricDifference(selection[level]),
-							)[0];
-							setSelection(
-								level === "region"
-									? selection.toggleRegion(SelectedValue)
-									: selection.toggleSykehus(SelectedValue),
-							);
-						}
-					}}
-					placeholder={chooseAreasText}
-					value={Array.from(selection[level])}
+					onChange={(event) => setYear(Number(event.target.value))}
+					placeholder={dict.analysebox.choose_year}
+					value={String(year)}
 				/>
 			</div>
-			<ToggleButtonGroup
-				exclusive
-				onChange={() => setLevel(level === "sykehus" ? "region" : "sykehus")}
-				orientation="horizontal"
-				value={[level]}
-			>
-				<ToggleButton fullWidth value="sykehus">
-					{dict.analysebox.sykehus}
-				</ToggleButton>
-				<ToggleButton fullWidth value="region">
-					{dict.analysebox.region}
-				</ToggleButton>
-			</ToggleButtonGroup>
-			{aggregeringTypes.size === 2 && (
-				<ToggleButtonGroup
-					value={[aggregering]}
-					exclusive
-					onChange={() => {
-						const newAggregering = aggregering === "kont" ? "pas" : "kont";
-						setAggregering(newAggregering);
-						if (!["begge", newAggregering].includes(currentView.aggregering)) {
-							setViewName("total");
-						}
-						if (
-							!["begge", newAggregering].includes(
-								views[tidstrendVariable.viewName].aggregering,
-							)
-						) {
-							setTidstrendVariable({
-								viewName: "total",
-								name: analyse.data.name,
-							});
-						}
-					}}
-				>
-					<ToggleButton value="kont" fullWidth>
-						{analyse.data.kontakt_begrep
-							? capitalize(analyse.data.kontakt_begrep[lang])
-							: dict.analysebox.kontakter}
-					</ToggleButton>
-					<ToggleButton value="pas" fullWidth>
-						{dict.analysebox.pasienter}
-					</ToggleButton>
-				</ToggleButtonGroup>
-			)}
-			<ToggleButtonGroup
-				value={[verdiType]}
-				exclusive
-				onChange={() => setVerdiType(verdiType === "rate" ? "n" : "rate")}
-			>
-				<ToggleButton value={"rate"} fullWidth>
-					Rate
-				</ToggleButton>
-				<ToggleButton value={"n"} fullWidth>
-					{dict.analysebox.antall}
-				</ToggleButton>
-			</ToggleButtonGroup>
-		</div>
+			<div className="hidden sm:block">
+				<Stack direction="row">
+					<IconButton
+						aria-label={animating ? "Pause" : (lang === "en" ? "Play" : "Spill av")}
+						onClick={() => {
+							if (!animating && year === lastYear) setYear(years[0]);
+							setAnimating(!animating);
+						}}
+						disabled={years.length < 2}
+					>
+						{animating ? <PauseIcon /> : <PlayArrowIcon />}
+					</IconButton>
+					<Box sx={{ flexGrow: 1, marginX: 2, marginRight: 4 }}>
+						<Slider
+							track={false}
+							value={year}
+							min={years[0]}
+							max={lastYear}
+							step={null}
+							marks={years.map((year) => ({ value: year, label: String(year) }))}
+							onChange={(_, value) => {
+								if (typeof value === "number") setYear(value);
+							}}
+							valueLabelDisplay="auto"
+							aria-label={dict.analysebox.choose_year}
+							disabled={years.length < 2}
+							sx={{
+								"@media (max-width: 600px)": {
+									"& .MuiSlider-markLabel": { fontSize: "0.75rem" },
+								},
+							}}
+						/>
+					</Box>
+				</Stack>
+			</div>
+		</>
 	);
+}
 
-	const [openSnackbar, setOpenSnackbar] = React.useState(false);
-	const graphRef = React.useRef<null | HTMLDivElement>(null);
+function DimensionControls({
+	data, view, values, onChange, lang, exclude = [],
+}: {
+	data: AnalysisData;
+	view: View;
+	values: DimensionValues;
+	onChange: (values: DimensionValues) => void;
+	lang: Lang;
+	exclude?: string[];
+}) {
+	return getEnumDimensions(data, view)
+		.filter((dimension) => !exclude.includes(dimension.id))
+		.map((dimension) => (
+			<ToggleButtonGroup
+				key={dimension.id}
+				value={values[dimension.id]}
+				exclusive
+				aria-label={dimension.label?.[lang] ?? dimension.id}
+				onChange={(_, value: string | null) => {
+					if (value !== null) onChange({ ...values, [dimension.id]: value });
+				}}
+			>
+				{dimension.values?.map((value) => (
+					<ToggleButton key={value.id} value={value.id}>
+						{value.label[lang]}
+					</ToggleButton>
+				))}
+			</ToggleButtonGroup>
+		));
+}
 
-	const lastNed = (
+export function ChartContainerPocMock({
+	analyse, lang, dict,
+}: ChartContainerPocMockProps) {
+	const data = analyse.data;
+	const [viewId, setViewId] = React.useState("total");
+	const [analyseTab, setAnalyseTab] = React.useState<"enkeltår" | "tidstrend">("enkeltår");
+	const [categoryTypeId, setCategoryTypeId] = React.useState("sykehus");
+	const [dimensionSelection, setDimensionSelection] = React.useState<DimensionValues>({});
+	const [selectedCategories, setSelectedCategories] = React.useState<Record<string, string[]>>({});
+	const [variableSelection, setVariableSelection] = React.useState<Record<string, string>>({});
+	const [showNorway, setShowNorway] = React.useState(false);
+	const [showGenders, setShowGenders] = React.useState(true);
+	const [proportion, setProportion] = React.useState(false);
+	const [allYears, setAllYears] = React.useState(true);
+	const [selectedYear, setSelectedYear] = React.useState<number>();
+	const [notification, setNotification] = React.useState<{ message: string; error: boolean }>();
+	const graphRef = React.useRef<HTMLDivElement>(null);
+	const chartId = React.useId();
+
+	const view = getView(data, viewId);
+	const isDemography = view.id === "demografi";
+	const dimensions = React.useMemo(
+		() => getDimensionValues(data, view, dimensionSelection),
+		[data, view, dimensionSelection],
+	);
+	const categoryType = getCategoryType(data,
+		view.categoryTypes.includes(categoryTypeId) ? categoryTypeId : view.categoryTypes[0],
+	);
+	const years = React.useMemo(() => getYears(data, view.id), [data, view.id]);
+	const year = selectedYear === undefined ? years[years.length - 1]
+		: years.reduce((closest, candidate) =>
+			Math.abs(candidate - selectedYear) < Math.abs(closest - selectedYear) ? candidate : closest,
+			years[0],
+		);
+	const variables = view.variables.filter((variable) => !isDemography || variable.id !== "population");
+	if (!variables.length) throw new Error(`View ${view.id} has no display variables`);
+	const variable = variables.find((variable) => variable.id === variableSelection[view.id]) ?? variables[0];
+	const selection = new Set(selectedCategories[categoryType.id] ?? []);
+	const isRate = dimensions.rate_eller_antall === "rate";
+	const valueFmt = (value: number | null) => value === null ? "-"
+		: formatNumber(value, lang,
+			dimensions.rate_eller_antall === "antall" &&
+			dimensions.pasienter_eller_kontaktdager === "pasienter"
+				? { maximumFractionDigits: 0 } : undefined,
+		);
+	const categoryLabel = (id: string) => {
+		const category = categoryType.categories.find((category) => category.id === id);
+		if (!category) throw new Error(`Unknown category: ${categoryType.id}/${id}`);
+		return category.label[lang].replaceAll("_", " ");
+	};
+	const caption = [
+		analyse.title, view.label[lang],
+		...getEnumDimensions(data, view)
+			.filter((dimension) => !isDemography || dimension.id !== "kjonn")
+			.map((dimension) => dimension.values?.find((value) =>
+				value.id === dimensions[dimension.id])?.label[lang]),
+		isDemography
+			? `${variable.label[lang]} · ${proportion ? dict.analysebox.andel : dict.analysebox.antall}`
+			: analyseTab === "tidstrend" ? variable.label[lang] : undefined,
+		(isDemography && allYears) || (!isDemography && analyseTab === "tidstrend")
+			? `${years[0]}-${years[years.length - 1]}` : String(year),
+	].filter(Boolean).join(" · ");
+
+	const barRowsByYear = React.useMemo(() => isDemography ? []
+		: years.map((year) => ({
+			year, rows: getBarRows(data, view, categoryType.id, { ...dimensions, year }),
+		})),
+		[data, view, categoryType.id, dimensions, years, isDemography],
+	);
+	const barRows = barRowsByYear.find((entry) => entry.year === year)?.rows ?? [];
+	const barMax = Math.max(0, ...barRowsByYear.flatMap((entry) =>
+		entry.rows.filter((row) => row.category !== "norge").map((row) => row.sum),
+	));
+	const trendRows = React.useMemo(() => isDemography ? []
+		: getTrendRows(data, view, categoryType.id, variable.id, dimensions),
+		[data, view, categoryType.id, variable.id, dimensions, isDemography],
+	);
+	const trendCategories = categoryType.categories.filter((category) =>
+		category.id === "norge" ? isRate || showNorway : selection.has(category.id),
+	);
+	const trendMax = Math.max(0, ...trendRows.flatMap((row) =>
+		categoryType.categories
+			.filter((category) => category.id !== "norge" || isRate || showNorway)
+			.flatMap((category) => {
+				const value = row.values[category.id];
+				return value === null ? [] : [value];
+			}),
+	));
+	const demographyRows = React.useMemo(() => !isDemography ? []
+		: getDemographyRows(data, view, variable.id, allYears ? years : [year],
+			dimensions, showGenders, proportion),
+		[data, view, variable.id, allYears, years, year, dimensions, showGenders, proportion, isDemography],
+	);
+	const demographyMax = React.useMemo(() => !isDemography ? 0
+		: Math.max(0, ...years.flatMap((year) =>
+			getDemographyRows(data, view, variable.id, [year], dimensions, showGenders, proportion)
+				.flatMap((row) => Object.values(row.values).flatMap((value) =>
+					value === null ? [] : [value],
+				)),
+		)),
+		[data, view, variable.id, years, dimensions, showGenders, proportion, isDemography],
+	);
+	const genders = isDemography ? getDimension(data, "kjonn").values ?? [] : [];
+	const demographySeries = showGenders
+		? genders.map((gender) => ({ id: gender.id, label: gender.label[lang] }))
+		: [{ id: "combined", label: lang === "en" ? "Both genders" : "Begge kjønn" }];
+	const hasMissingValues = isDemography
+		? demographyRows.some((row) => Object.values(row.values).some((value) => value === null))
+		: analyseTab === "tidstrend" && trendRows.some((row) =>
+			trendCategories.some((category) => row.values[category.id] === null),
+		);
+
+	function toggleCategory(id: string) {
+		if (id === "norge") return;
+		setSelectedCategories((previous) => {
+			const selected = new Set(previous[categoryType.id] ?? []);
+			if (selected.has(id)) selected.delete(id);
+			else selected.add(id);
+			return { ...previous, [categoryType.id]: [...selected] };
+		});
+	}
+
+	async function download(option: string) {
+		try {
+			if (option === dict.analysebox.download_data) {
+				const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], {
+					type: "application/json",
+				}));
+				const link = document.createElement("a");
+				link.href = url;
+				link.download = `${analyse.title}.json`;
+				document.body.appendChild(link);
+				link.click();
+				link.remove();
+				setTimeout(() => URL.revokeObjectURL(url), 0);
+				return;
+			}
+			if (!graphRef.current) throw new Error("The chart is not available for export");
+			if (option === dict.analysebox.copy_graph) {
+				const blob = await snapdom.toBlob(graphRef.current, { type: "png" });
+				if (!blob) throw new Error("Unable to create a chart image");
+				await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+				setNotification({ message: dict.analysebox.copy_graph_snackbar_message, error: false });
+			} else if (option === dict.analysebox.download_graph) {
+				const result = await snapdom(graphRef.current);
+				await result.download({
+					format: "png", backgroundColor: "white",
+					filename: `${analyse.title}_${view.id}_${isDemography && allYears
+						? "all_years" : !isDemography && analyseTab === "tidstrend" ? "tidstrend" : year}.png`,
+				});
+			}
+		} catch (error) {
+			console.error("Chart export failed", error);
+			setNotification({
+				message: `${lang === "en" ? "Export failed" : "Eksport feilet"}: ${error instanceof Error ? error.message : String(error)}`,
+				error: true,
+			});
+		}
+	}
+
+	const downloadButton = (
 		<SplitButton
 			label={dict.analysebox.download}
-			onClick={async (option) => {
-				switch (option) {
-					case dict.analysebox.copy_graph:
-						if (graphRef.current) {
-							await snapdom
-								.toBlob(graphRef.current, { type: "png" })
-								.then((blob) => {
-									blob &&
-										navigator.clipboard.write([
-											new ClipboardItem({ [blob.type]: blob }),
-										]);
-								})
-								.then(() => setOpenSnackbar(true));
-						}
-						break;
-					case dict.analysebox.download_graph:
-						if (graphRef.current) {
-							const result = await snapdom(graphRef.current);
-							await result.download({
-								format: "png",
-								backgroundColor: "white",
-								filename:
-									mainTab === "demografi"
-										? `${analyse.data.name}_demografi.png`
-										: analyseTab === "enkeltår"
-											? `${analyse.data.name}_${currentView.title[lang].toLowerCase().replace(" ", "_")}_${year}.png`
-											: `${analyse.data.name}_tidstrend.png`,
-							});
-						}
-						break;
-					case dict.analysebox.download_data:
-						downloadJSON(analyse.data);
-						break;
-				}
-			}}
-			options={[
-				dict.analysebox.copy_graph,
-				dict.analysebox.download_graph,
-				dict.analysebox.download_data,
-			]}
+			onClick={download}
+			options={[dict.analysebox.copy_graph, dict.analysebox.download_graph, dict.analysebox.download_data]}
 			steps="one-step"
 		/>
 	);
+	const variableSelector = (
+		<div className="w-45 sm:w-55 md:w-62.5">
+			<Dropdown
+				items={{ groups: [{ items: variables.map((variable) => ({
+					label: variable.label[lang], value: variable.id,
+				})) }] }}
+				placeholder={dict.analysebox.choose_variable}
+				value={variable.id}
+				onChange={(event) => setVariableSelection((previous) => ({
+					...previous, [view.id]: String(event.target.value),
+				}))}
+			/>
+		</div>
+	);
+	const noData = lang === "en" ? "No data for this selection" : "Ingen data for dette utvalget";
 
 	return (
 		<Box sx={{ width: "100%", typography: "body1" }}>
-			Debug data objects:
-			<br />
-			<div className="flex gap-4 bg-neutral-200 justify-between mb-8">
+			<div className="flex gap-4 bg-neutral-200 mb-8">
 				<JSONTree
-					data={{ demografiVariable, selection, tidstrendVariable }}
-					theme={jsonTreeTheme}
-					invertTheme={false}
-					hideRoot={true}
+					data={{ viewId, year, categoryType: categoryType.id, dimensions, selectedCategories, variable: variable.id }}
+					theme={jsonTreeTheme} invertTheme={false} hideRoot
 				/>
-				<JSONTree
-					data={analyse}
-					theme={jsonTreeTheme}
-					invertTheme={false}
-					hideRoot={true}
-				/>
+				<JSONTree data={data} theme={jsonTreeTheme} invertTheme={false} hideRoot />
 			</div>
-			Debug state variables:
-			<div className="flex flex-wrap gap-4 p-10 border bg-neutral-200 mb-8">
-				<div className="font-bold">år:</div>
-				<div>{year || "-"};</div>
-				<div className="font-bold">demografi:</div>
-				<div> {demographyAndel ? "yes" : "no"};</div>
-				<div className="font-bold">show genders:</div>
-				<div> {showGenders ? "yes" : "no"};</div>
-				<div className="font-bold">view:</div>
-				<div>{viewName || "-"};</div>
-				<div className="font-bold">all years:</div>
-				<div>{allYears ? "yes" : "no"};</div>
-				<div className="font-bold">analyse tab:</div>
-				<div>{analyseTab || "-"};</div>
-				<div className="font-bold">main tab:</div>
-				<div>{mainTab || "-"};</div>
-				<div className="font-bold">level:</div>
-				<div>{level || "-"};</div>
-				<div className="font-bold">verdi type:</div>
-				<div>{verdiType || "-"};</div>
-				<div className="font-bold">show Norway:</div>
-				<div>{showNorway ? "yes" : "no"};</div>
-			</div>
-			<TabContext value={activeMainTab}>
+			<TabContext value={viewId}>
 				<MyTabList
-					onChange={(_, value: string) => {
-						if (value === "demografi") {
-							setMainTab("demografi");
-						} else {
-							setMainTab("analyse");
-							setViewName(value === "analyse" ? "total" : value.slice(5));
-						}
-					}}
-					aria-label="Type datavisning"
-					variant="scrollable"
-					scrollButtons="auto"
+					onChange={(_, value: string) => setViewId(value)}
+					aria-label={lang === "en" ? "Data view" : "Datavisning"}
+					variant="scrollable" scrollButtons="auto"
 				>
-					<Tab
-						icon={<AssessmentIcon fontSize="small" />}
-						iconPosition="start"
-						label="Analyse"
-						value="analyse"
-						sx={{ textTransform: "none" }}
-					/>
-					<Tab
-						icon={<GroupsIcon fontSize="small" />}
-						iconPosition="start"
-						label={dict.analysebox.demography}
-						value="demografi"
-						sx={{ textTransform: "none" }}
-					/>
-					{focusViews.map((view) => (
+					{data.views.map((view) => (
 						<Tab
-							icon={
-								// TODO: Replace with mapping function based on view.name to select appropriate icon
-								view.name === "behandler" ? (
-									<DomainAddIcon fontSize="small" />
-								) : (
-									<MedicalInformationIcon fontSize="small" />
-								)
-							}
-							iconPosition="start"
-							key={view.name}
-							label={view.title[lang]}
-							value={`view:${view.name}`}
-							sx={{ textTransform: "none" }}
+							key={view.id} value={view.id}
+							label={view.id === "total" ? "Analyse" : view.label[lang]}
+							icon={view.id === "total" ? <AssessmentIcon fontSize="small" />
+								: view.id === "demografi" ? <GroupsIcon fontSize="small" />
+								: view.id === "behandler" ? <DomainAddIcon fontSize="small" />
+								: <MedicalInformationIcon fontSize="small" />}
+							iconPosition="start" sx={{ textTransform: "none" }}
 						/>
 					))}
 				</MyTabList>
-				<Paper
-					sx={{ background: BACKGROUND_COLOR, borderRadius: "0px 0px 8px 8px" }}
-					elevation={2}
-				>
-					{/* Analyse tab */}
-					<TabPanel
-						value={analysisViewTab}
-						sx={{ paddingX: 0, paddingBottom: 0 }}
-					>
-						{areaAndAggregationSelect}
-						<TabContext value={analyseTab}>
-							<Box
-								sx={{ borderBottom: 1, borderColor: "divider" }}
-								className="mx-4 sm:mx-8"
-							>
-								<MyTabList
-									onChange={(_, value) => {
-										setAnalyseTab(value);
-									}}
-									aria-label="Type datavisning"
+				<Paper sx={{ background: "white", borderRadius: "0px 0px 8px 8px" }} elevation={2}>
+					<TabPanel value={viewId} sx={{ paddingX: 0, paddingBottom: 0 }}>
+						<div className="flex flex-wrap gap-4 px-4 sm:px-8 mb-4">
+							{!isDemography && (
+								<>
+									<div className="w-45 sm:w-55 md:w-62.5">
+										<Dropdown
+											multiple removeAll={dict.analysebox.remove_choice}
+											items={{ groups: [{ items: categoryType.categories
+												.filter((category) => category.id !== "norge")
+												.map((category) => ({ label: categoryLabel(category.id), value: category.id })) }] }}
+											placeholder={`${dict.analysebox.choose_area}${selection.size ? ` (${selection.size})` : ""}`}
+											value={[...selection]}
+											onChange={(event) => setSelectedCategories((previous) => ({
+												...previous, [categoryType.id]: Array.from(event.target.value),
+											}))}
+										/>
+									</div>
+									<ToggleButtonGroup
+										value={categoryType.id} exclusive
+										aria-label={lang === "en" ? "Category type" : "Områdetype"}
+										onChange={(_, value: string | null) => {
+											if (value !== null) setCategoryTypeId(value);
+										}}
+									>
+										{view.categoryTypes.map((id) => (
+											<ToggleButton key={id} value={id}>
+												{getCategoryType(data, id).label[lang]}
+											</ToggleButton>
+										))}
+									</ToggleButtonGroup>
+								</>
+							)}
+							<DimensionControls
+								data={data} view={view} values={dimensions}
+								onChange={setDimensionSelection} lang={lang}
+								exclude={isDemography ? ["kjonn"] : []}
+							/>
+							{isDemography && (
+								<>
+									<ToggleButtonGroup value={showGenders} exclusive
+										onChange={(_, value: boolean | null) => { if (value !== null) setShowGenders(value); }}
+									>
+										<ToggleButton value={false}>{dict.analysebox.alle}</ToggleButton>
+										<ToggleButton value={true}>{dict.analysebox.demography_split_gender}</ToggleButton>
+									</ToggleButtonGroup>
+									<ToggleButtonGroup value={proportion} exclusive
+										onChange={(_, value: boolean | null) => { if (value !== null) setProportion(value); }}
+									>
+										<ToggleButton value={false}>{dict.analysebox.antall}</ToggleButton>
+										<ToggleButton value={true}>{dict.analysebox.andel}</ToggleButton>
+									</ToggleButtonGroup>
+									{variableSelector}
+									<ToggleButtonGroup value={allYears} exclusive
+										onChange={(_, value: boolean | null) => { if (value !== null) setAllYears(value); }}
+									>
+										<ToggleButton value={true}>{dict.analysebox.all_years}</ToggleButton>
+										<ToggleButton value={false}>{dict.analysebox.choose_year}</ToggleButton>
+									</ToggleButtonGroup>
+								</>
+							)}
+						</div>
+						{!isDemography && (
+							<Box sx={{ borderBottom: 1, borderColor: "divider" }} className="mx-4 sm:mx-8 mb-4">
+								<Tabs
+									value={analyseTab}
+									onChange={(_, value: "enkeltår" | "tidstrend") => setAnalyseTab(value)}
+									aria-label={lang === "en" ? "Chart type" : "Diagramtype"}
 								>
 									<Tab
 										icon={<BarChartIcon fontSize="small" />}
 										iconPosition="start"
+										id={`${chartId}-enkeltår`}
+										aria-controls={chartId}
 										label={dict.analysebox.single_year}
 										value="enkeltår"
 										sx={{ textTransform: "none" }}
@@ -926,318 +483,124 @@ export function ChartContainerPocMock({
 									<Tab
 										icon={<InsightsIcon fontSize="small" />}
 										iconPosition="start"
+										id={`${chartId}-tidstrend`}
+										aria-controls={chartId}
 										label={dict.analysebox.time_series}
 										value="tidstrend"
 										sx={{ textTransform: "none" }}
 									/>
-								</MyTabList>
+								</Tabs>
 							</Box>
-							<TabPanel value="enkeltår" sx={{ paddingX: 0, paddingBottom: 0 }}>
-								<div className="px-4 sm:px-8">
-									<div className="flex gap-4">
-										<div className="flex flex-wrap gap-4 gap-y-2 mb-4">
-											<YearSelectorDropdown
-												years={years}
-												lastYear={lastYear}
-												year={year}
-												setYear={setYear}
-												dict={dict}
-												speed={600}
-												className="block sm:hidden"
-											/>
-										</div>
-										<div className="ml-auto shrink-0">{lastNed}</div>
-									</div>
-									<YearSelectorSlider
-										years={years}
-										lastYear={lastYear}
-										year={year}
-										setYear={setYear}
-										dict={dict}
-										speed={600}
-										className="hidden sm:block"
-									/>
-								</div>
-								<div className="p-4 border bg-neutral-100 text-center ">
-									Graph goes here
-								</div>
-								{/* <div>
-									<ScreenshotBox
-										graphRef={graphRef}
-										analyse={analyse}
-										description={getDescription(
-											analyse.data,
-											lang,
-											verdiType,
-											aggregering,
-											undefined,
-											nynorsk,
-										)}
-									>
-										<AnalyseBarChart
-											categories={Object.keys(
-												analyse.data.data[viewName][lastYear][level],
-											).filter(
-												(cat) => cat !== "Norge" || verdiType === "rate",
-											)}
-											variables={currentView.variables.map(
-												(variable) => variable.name,
-											)}
-											valueGetter={(category, variable) =>
-												analyse.data.data[viewName][year][level][category][
-													variable
-												][`${aggregering}_${verdiType}`]
-											}
-											variableFmt={(variable) => varNames[variable][lang]}
-											categoryFmt={(category) =>
-												getAreaName(category, lang, nynorsk)
-											}
-											valueAxisFmt={(v) =>
-												new Intl.NumberFormat(lang).format(v)
-											}
-											valueFmt={(v) =>
-												formatNumber(
-													v || 0,
-													lang,
-													verdiType === "n" && aggregering === "pas"
-														? { maximumFractionDigits: 0 }
-														: undefined,
-												)
-											}
-											special_values={new Set(["Norge"])}
-											selection={
-												level === "region"
-													? selection.region
-													: selection.sykehus
-											}
-											onClick={(area) =>
-												area !== "Norge" &&
-												setSelection(
-													level === "region"
-														? selection.toggleRegion(area)
-														: selection.toggleSykehus(area),
-												)
-											}
-											maxValue={
-												maxValues["total"][level][analyse.data.name][
-													`${aggregering}_${verdiType}`
-												].withoutNorway
-											}
-										/>
-									</ScreenshotBox>
-								</div> */}
-							</TabPanel>
-							<TabPanel
-								value="tidstrend"
-								sx={{ paddingX: 0, paddingBottom: 0 }}
-							>
-								<div className="flex gap-4 px-4 sm:px-8">
-									<div className="flex flex-row gap-4 flex-wrap">
-										<VariableSelector
-											analyse={analyse.data}
-											views={analyse.data.views
-												.filter((v) =>
-													["begge", aggregering].includes(v.aggregering),
-												)
-												.slice(1)}
-											dict={dict}
-											lang={lang}
-											variable={tidstrendVariable}
-											onClick={(v) => setTidstrendVariable(v)}
-										/>
-										{verdiType === "n" && (
-											<FormControlLabel
-												control={
-													<Switch
-														checked={showNorway}
-														onChange={() => setShowNorway(!showNorway)}
-													/>
-												}
-												label={
-													<Typography
-														variant="body2"
-														sx={{ display: "inline" }}
-													>
-														{dict.analysebox.show_norway}
-													</Typography>
-												}
-											/>
-										)}
-									</div>
-									<div className="ml-auto shrink-0">{lastNed}</div>
-								</div>
-								<ScreenshotBox
-									analyse={analyse}
-									description={getDescription(
-										analyse.data,
-										lang,
-										verdiType,
-										aggregering,
-										tidstrendVariable.name !== analyse.data.name
-											? tidstrendVariable
-											: undefined,
-										nynorsk,
+						)}
+						<div className="flex flex-wrap gap-4 px-4 sm:px-8 mb-4">
+							{!isDemography && analyseTab === "tidstrend" && (
+								<>
+									{variableSelector}
+									{!isRate && (
+										<FormControlLabel control={<Switch checked={showNorway}
+											onChange={(_, checked) => setShowNorway(checked)} />}
+											label={dict.analysebox.show_norway} />
 									)}
-									graphRef={graphRef}
-								>
-									<AnalyseLineChart
-										analyse={analyse.data}
-										years={viewYears[tidstrendVariable.viewName]}
-										level={level}
-										categoryFmt={(category) =>
-											getAreaName(category, lang, nynorsk)
-										}
-										valueFmt={(v) =>
-											formatNumber(
-												v || 0,
-												lang,
-												verdiType === "n" && aggregering === "pas"
-													? { maximumFractionDigits: 0 }
-													: undefined,
-											)
-										}
-										inflection={`${aggregering}_${verdiType}`}
-										variable={tidstrendVariable}
-										showNorway={verdiType === "rate" || showNorway}
-										selection={selection}
-										lang={lang}
-										maxValue={
-											maxValues[tidstrendVariable.viewName][level][
-												tidstrendVariable.name
-											][`${aggregering}_${verdiType}`][
-												showNorway ? "all" : "withoutNorway"
-											]
-										}
-									/>
-								</ScreenshotBox>
-							</TabPanel>
-						</TabContext>
-					</TabPanel>
-
-					{/* Demografi tab */}
-					<TabPanel value="demografi" sx={{ paddingX: 0, paddingBottom: 0 }}>
-						<div className="px-4 sm:px-8">
-							<div className="flex gap-4">
-								<div className="flex flex-wrap gap-4 mb-4">
-									{analyse.data.kjonn === "begge" && (
-										<ToggleButtonGroup
-											value={[showGenders]}
-											exclusive
-											onChange={() => setShowGenders(!showGenders)}
-											disabled={analyse.data.kjonn !== "begge"}
-										>
-											<ToggleButton value={false}>
-												{dict.analysebox.alle}
-											</ToggleButton>
-											<ToggleButton value={true}>
-												{dict.analysebox.demography_split_gender}
-											</ToggleButton>
-										</ToggleButtonGroup>
-									)}
-									<ToggleButtonGroup
-										value={[demographyAndel]}
-										exclusive
-										onChange={() => setDemographyAndel(!demographyAndel)}
-									>
-										<ToggleButton value={false}>
-											{dict.analysebox.antall}
-										</ToggleButton>
-										<ToggleButton value={true}>
-											{dict.analysebox.andel}
-										</ToggleButton>
-									</ToggleButtonGroup>
-									<VariableSelector
-										analyse={analyse.data}
-										views={analyse.data.views
-											.slice(1)
-											.filter((v) => demographyAvailable.has(v.name))}
-										dict={dict}
-										lang={lang}
-										variable={demografiVariable}
-										onClick={(v) => setDemografiVariable(v)}
-									/>
-									<ToggleButtonGroup
-										value={allYears}
-										exclusive
-										onChange={() => setAllYears(!allYears)}
-									>
-										<ToggleButton value={true}>
-											{dict.analysebox.all_years}
-										</ToggleButton>
-										<ToggleButton value={false}>
-											{dict.analysebox.choose_year}
-										</ToggleButton>
-									</ToggleButtonGroup>
-									{!allYears && (
-										<YearSelectorDropdown
-											className="block sm:hidden"
-											years={demographyYears}
-											lastYear={demographyYears.at(-1) as number}
-											year={demographyYear}
-											setYear={setYear}
-											dict={dict}
-											speed={1000}
-										/>
-									)}
-								</div>
-								<div className="ml-auto shrink-0">{lastNed}</div>
-							</div>
-							{!allYears && (
-								<YearSelectorSlider
-									years={demographyYears}
-									lastYear={demographyYears.at(-1) as number}
-									year={demographyYear}
-									setYear={setYear}
-									dict={dict}
-									speed={600}
-									className="hidden sm:block"
-								/>
+								</>
 							)}
+							<div className="ml-auto shrink-0">{downloadButton}</div>
 						</div>
-						<ScreenshotBox
-							graphRef={graphRef}
-							analyse={analyse}
-							description={
-								<Typography variant="body2">
-									{demographyAndel
-										? `${dict.analysebox.andel} ${lang === "en" ? "of" : "av"} ${dict.analysebox[analyse.data.kjonn === "begge" && showGenders ? "gender_age_group" : "age_group"]}`
-										: `${dict.analysebox.antall}${{ en: " of", no: "" }[lang]} ${kategori.special ? kategori[lang] : dict.analysebox.people} ${{ en: "in", no: "i" }[lang]} ${dict.analysebox[analyse.data.kjonn === "begge" && showGenders ? "gender_age_group" : "age_group"]}`}
-									{demografiVariable.name !== analyse.data.name &&
-										getVariableText(analyse.data, lang, demografiVariable)}
-								</Typography>
-							}
+						{(isDemography ? !allYears : analyseTab === "enkeltår") && (
+							<div className="px-4 sm:px-8">
+								<YearSelector years={years} year={year} setYear={setSelectedYear} dict={dict} lang={lang} />
+							</div>
+						)}
+						{hasMissingValues && <Alert severity="warning" className="mx-4 sm:mx-8">
+							{lang === "en" ? "Some observations are missing or have no population denominator; gaps are shown in the chart."
+								: "Noen observasjoner mangler eller har ingen befolkningsnevner; disse vises som hull i diagrammet."}
+						</Alert>}
+						<div className="px-0 md:px-8" ref={graphRef}
+							id={chartId} role={isDemography ? undefined : "tabpanel"}
+							aria-labelledby={isDemography ? undefined : `${chartId}-${analyseTab}`}
 						>
-							<AnalyseDemography
-								analyse={analyse.data}
-								showGenders={showGenders}
-								variable={demografiVariable}
-								andel={demographyAndel}
-								lang={lang}
-								year={allYears ? "all_years" : demographyYear}
-								years={demographyYears}
-							/>
-						</ScreenshotBox>
+							<Box sx={{ width: "100%", height: "80vw", maxHeight: 700, minHeight: 370, position: "relative" }}>
+								{!isDemography && analyseTab === "enkeltår" && (
+									<AnalyseBarChart
+										categories={barRows.filter((row) => row.category !== "norge" || isRate).map((row) => row.category)}
+										categoryFmt={categoryLabel}
+										variables={view.variables.map((variable) => variable.id)}
+										variableFmt={(id) => {
+											const variable = view.variables.find((variable) => variable.id === id);
+											if (!variable) throw new Error(`Unknown variable: ${id}`);
+											return variable.label[lang];
+										}}
+										valueGetter={(category, variable) => {
+											const row = barRows.find((row) => row.category === category);
+											if (!row) throw new Error(`Missing bar category: ${category}`);
+											return row.values[variable];
+										}}
+										valueAxisFmt={(value) => formatNumber(value, lang)}
+										valueFmt={valueFmt}
+										special_values={new Set(["norge"])}
+										selection={selection} onClick={toggleCategory}
+										maxValue={barMax > 0 ? barMax * 1.01 : 1}
+									/>
+								)}
+								{!isDemography && analyseTab === "tidstrend" && (
+									trendCategories.length === 0 ? <Alert severity="info">
+										{lang === "en" ? "No referral areas selected" : "Ingen opptaksområder valgt"}
+									</Alert> : <LineChart
+										xAxis={[{ scaleType: "point", data: trendRows.map((row) => row.year), valueFormatter: String, height: "auto" }]}
+										yAxis={[{ min: 0, max: trendMax > 0 ? trendMax * 1.01 : 1, width: "auto" }]}
+										series={trendCategories.map((category) => ({
+											id: category.id, label: categoryLabel(category.id),
+											data: trendRows.map((row) => row.values[category.id]),
+											valueFormatter: valueFmt, curve: "linear", showMark: true,
+											...(category.id === "norge" ? { color: "#9AA2AB" } : {}),
+										}))}
+									/>
+								)}
+								{isDemography && (
+									<LineChart
+										xAxis={[{
+											scaleType: "point", data: demographyRows.map((row) => row.category),
+											valueFormatter: categoryLabel, height: "auto",
+										}]}
+										yAxis={[{
+											min: 0, max: demographyMax > 0 ? demographyMax * 1.01 : 1, width: "auto",
+											valueFormatter: (value: number | null) => value === null ? "-"
+												: formatNumber(value, lang, proportion ? { style: "percent" } : undefined),
+										}]}
+										series={demographySeries.map((series) => ({
+											...series, data: demographyRows.map((row) => row.values[series.id]),
+											color: series.id === genders[0]?.id ? "#95BDE6" : "#00509E",
+											showMark: false,
+											valueFormatter: (value: number | null) => value === null ? "-"
+												: formatNumber(value, lang, proportion ? { style: "percent" } : { maximumFractionDigits: 0 }),
+										}))}
+										hideLegend={!showGenders || genders.length < 2}
+										localeText={{ noData }}
+									/>
+								)}
+								<Box component="img" alt={`${analyse.author} logo`}
+									src={analyse.author === "SKDE" ? "/img/logo-skde-graa.svg" : "/img/helse-forde-graa.svg"}
+									sx={{ width: "15vw", maxWidth: analyse.author === "SKDE" ? 100 : 150,
+										position: "absolute", bottom: 55, right: 30, pointerEvents: "none" }} />
+							</Box>
+							<Typography variant="body2" sx={{ textAlign: "center", padding: 2, paddingBottom: 3 }}>
+								{caption}
+							</Typography>
+						</div>
 					</TabPanel>
 				</Paper>
 			</TabContext>
-			<Snackbar
-				open={openSnackbar}
-				autoHideDuration={4000}
-				onClose={() => setOpenSnackbar(false)}
-				slots={{ transition: Slide }}
-				message={dict.analysebox.copy_graph_snackbar_message}
+			<Snackbar open={notification !== undefined} autoHideDuration={4000}
+				onClose={() => setNotification(undefined)}
 				anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-				action={
-					<IconButton
-						size="small"
-						aria-label="close"
-						color="inherit"
-						onClick={() => setOpenSnackbar(false)}
-					>
-						<CloseIcon fontSize="small" />
-					</IconButton>
-				}
-			/>
+			>
+				<Alert severity={notification?.error ? "error" : "success"}
+					action={<IconButton size="small" color="inherit"
+						aria-label={lang === "en" ? "Close" : "Lukk"}
+						onClick={() => setNotification(undefined)}><CloseIcon fontSize="small" /></IconButton>}
+				>
+					{notification?.message}
+				</Alert>
+			</Snackbar>
 		</Box>
 	);
 }
