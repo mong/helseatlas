@@ -1,6 +1,8 @@
 "use client";
 
 import {
+	Accordion,
+	AccordionItem,
 	Dropdown,
 	SplitButton,
 	ToggleButton,
@@ -548,425 +550,444 @@ export function ChartContainerPocMock({
 			: "Ingen data for dette utvalget";
 
 	return (
-		<Box sx={{ width: "100%", typography: "body1" }}>
-			<div className="flex gap-4 bg-neutral-200 mb-8">
-				<JSONTree
-					data={{
-						viewId,
-						year,
-						categoryType: categoryType.id,
-						dimensions,
-						selectedCategories,
-						variable: variable.id,
-					}}
-					theme={jsonTreeTheme}
-					invertTheme={false}
-					hideRoot
-				/>
-				<JSONTree
-					data={data}
-					theme={jsonTreeTheme}
-					invertTheme={false}
-					hideRoot
-				/>
-			</div>
-			<TabContext value={viewId}>
-				<MyTabList
-					onChange={(_, value: string) => setViewId(value)}
-					aria-label={lang === "en" ? "Data view" : "Datavisning"}
-					variant="scrollable"
-					scrollButtons="auto"
+		<>
+			<div className="pt-2 pb-12">
+				<Accordion
+					keyId="debug-accordion"
+					gap="2"
+					variant="text"
+					type="allowMultiple"
 				>
-					{data.views.map((view) => (
-						<Tab
-							key={view.id}
-							value={view.id}
-							label={view.id === "total" ? "Analyse" : view.label[lang]}
-							icon={
-								view.id === "total" ? (
-									<AssessmentIcon fontSize="small" />
-								) : view.id === "demografi" ? (
-									<GroupsIcon fontSize="small" />
-								) : view.id === "behandler" ? (
-									<DomainAddIcon fontSize="small" />
-								) : (
-									<MedicalInformationIcon fontSize="small" />
-								)
-							}
-							iconPosition="start"
-							sx={{ textTransform: "none" }}
+					<AccordionItem title="State">
+						<JSONTree
+							data={{
+								viewId,
+								year,
+								categoryType: categoryType.id,
+								dimensions,
+								selectedCategories,
+								variable: variable.id,
+							}}
+							theme={jsonTreeTheme}
+							invertTheme={false}
+							hideRoot
 						/>
-					))}
-				</MyTabList>
-				<Paper
-					sx={{ background: "white", borderRadius: "0px 0px 8px 8px" }}
-					elevation={2}
-				>
-					<TabPanel value={viewId} sx={{ paddingX: 0, paddingBottom: 0 }}>
-						<div className="flex flex-wrap justify-between gap-4 px-4 sm:px-8 mb-10 w-full h-20">
-							{!isDemography && (
-								<>
-									<div className="w-full">
-										<Dropdown
-											multiple
-											removeAll={dict.analysebox.remove_choice}
-											items={{
-												groups: [
-													{
-														items: categoryType.categories
-															.filter((category) => category.id !== "norge")
-															.map((category) => ({
-																label: categoryLabel(category.id),
-																value: category.id,
-															})),
-													},
-												],
-											}}
-											placeholder={`${dict.analysebox.choose_area}${selection.size ? ` (${selection.size})` : ""}`}
-											value={[...selection]}
-											onChange={(event) =>
-												setSelectedCategories((previous) => ({
-													...previous,
-													[categoryType.id]: Array.from(event.target.value),
-												}))
+					</AccordionItem>
+				</Accordion>
+			</div>
+			<Box sx={{ width: "100%", typography: "body1" }}>
+				<TabContext value={viewId}>
+					<MyTabList
+						onChange={(_, value: string) => setViewId(value)}
+						aria-label={lang === "en" ? "Data view" : "Datavisning"}
+						variant="scrollable"
+						scrollButtons="auto"
+					>
+						{data.views.map((view) => (
+							<Tab
+								key={view.id}
+								value={view.id}
+								label={view.id === "total" ? "Analyse" : view.label[lang]}
+								icon={
+									view.id === "total" ? (
+										<AssessmentIcon fontSize="small" />
+									) : view.id === "demografi" ? (
+										<GroupsIcon fontSize="small" />
+									) : view.id === "behandler" ? (
+										<DomainAddIcon fontSize="small" />
+									) : (
+										<MedicalInformationIcon fontSize="small" />
+									)
+								}
+								iconPosition="start"
+								sx={{ textTransform: "none" }}
+							/>
+						))}
+					</MyTabList>
+					<Paper
+						sx={{ background: "white", borderRadius: "0px 0px 8px 8px" }}
+						elevation={2}
+					>
+						<TabPanel value={viewId} sx={{ paddingX: 0, paddingBottom: 0 }}>
+							<div className="flex flex-wrap justify-between gap-4 px-4 sm:px-8 mb-10 w-full h-20">
+								{!isDemography && (
+									<>
+										<div className="w-full">
+											<Dropdown
+												multiple
+												removeAll={dict.analysebox.remove_choice}
+												items={{
+													groups: [
+														{
+															items: categoryType.categories
+																.filter((category) => category.id !== "norge")
+																.map((category) => ({
+																	label: categoryLabel(category.id),
+																	value: category.id,
+																})),
+														},
+													],
+												}}
+												placeholder={`${dict.analysebox.choose_area}${selection.size ? ` (${selection.size})` : ""}`}
+												value={[...selection]}
+												onChange={(event) =>
+													setSelectedCategories((previous) => ({
+														...previous,
+														[categoryType.id]: Array.from(event.target.value),
+													}))
+												}
+											/>
+										</div>
+										<ToggleButtonGroup
+											{...toggleButtonGroupProps}
+											value={categoryType.id}
+											aria-label={
+												lang === "en" ? "Category type" : "Områdetype"
 											}
-										/>
-									</div>
-									<ToggleButtonGroup
-										{...toggleButtonGroupProps}
-										value={categoryType.id}
-										aria-label={lang === "en" ? "Category type" : "Områdetype"}
-										onChange={(_, value: string | null) => {
-											if (value !== null) setCategoryTypeId(value);
-										}}
-									>
-										{view.categoryTypes.map((id) => (
+											onChange={(_, value: string | null) => {
+												if (value !== null) setCategoryTypeId(value);
+											}}
+										>
+											{view.categoryTypes.map((id) => (
+												<ToggleButton
+													key={id}
+													value={id}
+													className={filterControlClasses}
+												>
+													{getCategoryType(data, id).label[lang]}
+												</ToggleButton>
+											))}
+										</ToggleButtonGroup>
+									</>
+								)}
+								<DimensionControls
+									data={data}
+									view={view}
+									values={dimensions}
+									onChange={setDimensionSelection}
+									lang={lang}
+									exclude={isDemography ? ["kjonn"] : []}
+								/>
+								{isDemography && (
+									<>
+										<ToggleButtonGroup
+											value={showGenders}
+											{...toggleButtonGroupProps}
+											onChange={(_, value: boolean | null) => {
+												if (value !== null) setShowGenders(value);
+											}}
+										>
 											<ToggleButton
-												key={id}
-												value={id}
+												value={false}
 												className={filterControlClasses}
 											>
-												{getCategoryType(data, id).label[lang]}
+												{dict.analysebox.alle}
 											</ToggleButton>
-										))}
-									</ToggleButtonGroup>
-								</>
-							)}
-							<DimensionControls
-								data={data}
-								view={view}
-								values={dimensions}
-								onChange={setDimensionSelection}
-								lang={lang}
-								exclude={isDemography ? ["kjonn"] : []}
-							/>
-							{isDemography && (
-								<>
-									<ToggleButtonGroup
-										value={showGenders}
-										{...toggleButtonGroupProps}
-										onChange={(_, value: boolean | null) => {
-											if (value !== null) setShowGenders(value);
-										}}
-									>
-										<ToggleButton
-											value={false}
-											className={filterControlClasses}
+											<ToggleButton
+												value={true}
+												className={filterControlClasses}
+											>
+												{dict.analysebox.demography_split_gender}
+											</ToggleButton>
+										</ToggleButtonGroup>
+										<ToggleButtonGroup
+											value={proportion}
+											{...toggleButtonGroupProps}
+											onChange={(_, value: boolean | null) => {
+												if (value !== null) setProportion(value);
+											}}
 										>
-											{dict.analysebox.alle}
-										</ToggleButton>
-										<ToggleButton value={true} className={filterControlClasses}>
-											{dict.analysebox.demography_split_gender}
-										</ToggleButton>
-									</ToggleButtonGroup>
-									<ToggleButtonGroup
-										value={proportion}
-										{...toggleButtonGroupProps}
-										onChange={(_, value: boolean | null) => {
-											if (value !== null) setProportion(value);
-										}}
-									>
-										<ToggleButton
-											value={false}
-											className={filterControlClasses}
+											<ToggleButton
+												value={false}
+												className={filterControlClasses}
+											>
+												{dict.analysebox.antall}
+											</ToggleButton>
+											<ToggleButton
+												value={true}
+												className={filterControlClasses}
+											>
+												{dict.analysebox.andel}
+											</ToggleButton>
+										</ToggleButtonGroup>
+										{variableSelector}
+										<ToggleButtonGroup
+											value={allYears}
+											{...toggleButtonGroupProps}
+											onChange={(_, value: boolean | null) => {
+												if (value !== null) setAllYears(value);
+											}}
 										>
-											{dict.analysebox.antall}
-										</ToggleButton>
-										<ToggleButton value={true} className={filterControlClasses}>
-											{dict.analysebox.andel}
-										</ToggleButton>
-									</ToggleButtonGroup>
-									{variableSelector}
-									<ToggleButtonGroup
-										value={allYears}
-										{...toggleButtonGroupProps}
-										onChange={(_, value: boolean | null) => {
-											if (value !== null) setAllYears(value);
-										}}
-									>
-										<ToggleButton value={true} className={filterControlClasses}>
-											{dict.analysebox.all_years}
-										</ToggleButton>
-										<ToggleButton
-											value={false}
-											className={filterControlClasses}
-										>
-											{dict.analysebox.choose_year}
-										</ToggleButton>
-									</ToggleButtonGroup>
-								</>
-							)}
-						</div>
-						{!isDemography && (
-							<Box
-								sx={{ borderBottom: 1, borderColor: "divider" }}
-								className="mx-4 sm:mx-8 mb-4"
-							>
-								<Tabs
-									value={analyseTab}
-									onChange={(_, value: "enkeltår" | "tidstrend") =>
-										setAnalyseTab(value)
-									}
-									aria-label={lang === "en" ? "Chart type" : "Diagramtype"}
+											<ToggleButton
+												value={true}
+												className={filterControlClasses}
+											>
+												{dict.analysebox.all_years}
+											</ToggleButton>
+											<ToggleButton
+												value={false}
+												className={filterControlClasses}
+											>
+												{dict.analysebox.choose_year}
+											</ToggleButton>
+										</ToggleButtonGroup>
+									</>
+								)}
+							</div>
+							{!isDemography && (
+								<Box
+									sx={{ borderBottom: 1, borderColor: "divider" }}
+									className="mx-4 sm:mx-8 mb-4"
 								>
-									<Tab
-										icon={<BarChartIcon fontSize="small" />}
-										iconPosition="start"
-										id={`${chartId}-enkeltår`}
-										aria-controls={chartId}
-										label={dict.analysebox.single_year}
-										value="enkeltår"
-										sx={{ textTransform: "none" }}
+									<Tabs
+										value={analyseTab}
+										onChange={(_, value: "enkeltår" | "tidstrend") =>
+											setAnalyseTab(value)
+										}
+										aria-label={lang === "en" ? "Chart type" : "Diagramtype"}
+									>
+										<Tab
+											icon={<BarChartIcon fontSize="small" />}
+											iconPosition="start"
+											id={`${chartId}-enkeltår`}
+											aria-controls={chartId}
+											label={dict.analysebox.single_year}
+											value="enkeltår"
+											sx={{ textTransform: "none" }}
+										/>
+										<Tab
+											icon={<InsightsIcon fontSize="small" />}
+											iconPosition="start"
+											id={`${chartId}-tidstrend`}
+											aria-controls={chartId}
+											label={dict.analysebox.time_series}
+											value="tidstrend"
+											sx={{ textTransform: "none" }}
+										/>
+									</Tabs>
+								</Box>
+							)}
+							<div className="flex flex-wrap gap-4 px-4 sm:px-8 mb-4">
+								{!isDemography && analyseTab === "tidstrend" && (
+									<>
+										{variableSelector}
+										{!isRate && (
+											<FormControlLabel
+												control={
+													<Switch
+														checked={showNorway}
+														onChange={(_, checked) => setShowNorway(checked)}
+													/>
+												}
+												label={dict.analysebox.show_norway}
+											/>
+										)}
+									</>
+								)}
+								<div className="ml-auto shrink-0">{downloadButton}</div>
+							</div>
+							{(isDemography ? !allYears : analyseTab === "enkeltår") && (
+								<div className="px-4 sm:px-8">
+									<YearSelector
+										years={years}
+										year={year}
+										setYear={setSelectedYear}
+										dict={dict}
+										lang={lang}
 									/>
-									<Tab
-										icon={<InsightsIcon fontSize="small" />}
-										iconPosition="start"
-										id={`${chartId}-tidstrend`}
-										aria-controls={chartId}
-										label={dict.analysebox.time_series}
-										value="tidstrend"
-										sx={{ textTransform: "none" }}
-									/>
-								</Tabs>
-							</Box>
-						)}
-						<div className="flex flex-wrap gap-4 px-4 sm:px-8 mb-4">
-							{!isDemography && analyseTab === "tidstrend" && (
-								<>
-									{variableSelector}
-									{!isRate && (
-										<FormControlLabel
-											control={
-												<Switch
-													checked={showNorway}
-													onChange={(_, checked) => setShowNorway(checked)}
-												/>
-											}
-											label={dict.analysebox.show_norway}
+								</div>
+							)}
+							{hasMissingValues && (
+								<Alert severity="warning" className="mx-4 sm:mx-8">
+									{lang === "en"
+										? "Some observations are missing or have no population denominator; gaps are shown in the chart."
+										: "Noen observasjoner mangler eller har ingen befolkningsnevner; disse vises som hull i diagrammet."}
+								</Alert>
+							)}
+							<div
+								className="px-0 md:px-8"
+								ref={graphRef}
+								id={chartId}
+								role={isDemography ? undefined : "tabpanel"}
+								// aria-labelledby={isDemography ? undefined : `${chartId}-${analyseTab}`}
+							>
+								<Box
+									sx={{
+										width: "100%",
+										height: "80vw",
+										maxHeight: 700,
+										minHeight: 370,
+										position: "relative",
+									}}
+								>
+									{!isDemography && analyseTab === "enkeltår" && (
+										<AnalyseBarChart
+											categories={barRows
+												.filter((row) => row.category !== "norge" || isRate)
+												.map((row) => row.category)}
+											categoryFmt={categoryLabel}
+											variables={view.variables.map((variable) => variable.id)}
+											variableFmt={(id) => {
+												const variable = view.variables.find(
+													(variable) => variable.id === id,
+												);
+												if (!variable)
+													throw new Error(`Unknown variable: ${id}`);
+												return variable.label[lang];
+											}}
+											valueGetter={(category, variable) => {
+												const row = barRows.find(
+													(row) => row.category === category,
+												);
+												if (!row)
+													throw new Error(`Missing bar category: ${category}`);
+												return row.values[variable];
+											}}
+											valueAxisFmt={(value) => formatNumber(value, lang)}
+											valueFmt={valueFmt}
+											special_values={new Set(["norge"])}
+											selection={selection}
+											onClick={toggleCategory}
+											maxValue={barMax > 0 ? barMax * 1.01 : 1}
 										/>
 									)}
-								</>
-							)}
-							<div className="ml-auto shrink-0">{downloadButton}</div>
-						</div>
-						{(isDemography ? !allYears : analyseTab === "enkeltår") && (
-							<div className="px-4 sm:px-8">
-								<YearSelector
-									years={years}
-									year={year}
-									setYear={setSelectedYear}
-									dict={dict}
-									lang={lang}
-								/>
-							</div>
-						)}
-						{hasMissingValues && (
-							<Alert severity="warning" className="mx-4 sm:mx-8">
-								{lang === "en"
-									? "Some observations are missing or have no population denominator; gaps are shown in the chart."
-									: "Noen observasjoner mangler eller har ingen befolkningsnevner; disse vises som hull i diagrammet."}
-							</Alert>
-						)}
-						<div
-							className="px-0 md:px-8"
-							ref={graphRef}
-							id={chartId}
-							role={isDemography ? undefined : "tabpanel"}
-							// aria-labelledby={isDemography ? undefined : `${chartId}-${analyseTab}`}
-						>
-							<Box
-								sx={{
-									width: "100%",
-									height: "80vw",
-									maxHeight: 700,
-									minHeight: 370,
-									position: "relative",
-								}}
-							>
-								{!isDemography && analyseTab === "enkeltår" && (
-									<AnalyseBarChart
-										categories={barRows
-											.filter((row) => row.category !== "norge" || isRate)
-											.map((row) => row.category)}
-										categoryFmt={categoryLabel}
-										variables={view.variables.map((variable) => variable.id)}
-										variableFmt={(id) => {
-											const variable = view.variables.find(
-												(variable) => variable.id === id,
-											);
-											if (!variable) throw new Error(`Unknown variable: ${id}`);
-											return variable.label[lang];
-										}}
-										valueGetter={(category, variable) => {
-											const row = barRows.find(
-												(row) => row.category === category,
-											);
-											if (!row)
-												throw new Error(`Missing bar category: ${category}`);
-											return row.values[variable];
-										}}
-										valueAxisFmt={(value) => formatNumber(value, lang)}
-										valueFmt={valueFmt}
-										special_values={new Set(["norge"])}
-										selection={selection}
-										onClick={toggleCategory}
-										maxValue={barMax > 0 ? barMax * 1.01 : 1}
-									/>
-								)}
-								{!isDemography &&
-									analyseTab === "tidstrend" &&
-									(trendCategories.length === 0 ? (
-										<Alert severity="info">
-											{lang === "en"
-												? "No referral areas selected"
-												: "Ingen opptaksområder valgt"}
-										</Alert>
-									) : (
+									{!isDemography &&
+										analyseTab === "tidstrend" &&
+										(trendCategories.length === 0 ? (
+											<Alert severity="info">
+												{lang === "en"
+													? "No referral areas selected"
+													: "Ingen opptaksområder valgt"}
+											</Alert>
+										) : (
+											<LineChart
+												xAxis={[
+													{
+														scaleType: "point",
+														data: trendRows.map((row) => row.year),
+														valueFormatter: String,
+														height: "auto",
+													},
+												]}
+												yAxis={[
+													{
+														min: 0,
+														max: trendMax > 0 ? trendMax * 1.01 : 1,
+														width: "auto",
+													},
+												]}
+												series={trendCategories.map((category) => ({
+													id: category.id,
+													label: categoryLabel(category.id),
+													data: trendRows.map((row) => row.values[category.id]),
+													valueFormatter: valueFmt,
+													curve: "linear",
+													showMark: true,
+													...(category.id === "norge"
+														? { color: "#9AA2AB" }
+														: {}),
+												}))}
+											/>
+										))}
+									{isDemography && (
 										<LineChart
 											xAxis={[
 												{
 													scaleType: "point",
-													data: trendRows.map((row) => row.year),
-													valueFormatter: String,
+													data: demographyRows.map((row) => row.category),
+													valueFormatter: categoryLabel,
 													height: "auto",
 												},
 											]}
 											yAxis={[
 												{
 													min: 0,
-													max: trendMax > 0 ? trendMax * 1.01 : 1,
+													max: demographyMax > 0 ? demographyMax * 1.01 : 1,
 													width: "auto",
+													valueFormatter: (value: number | null) =>
+														value === null
+															? "-"
+															: formatNumber(
+																	value,
+																	lang,
+																	proportion ? { style: "percent" } : undefined,
+																),
 												},
 											]}
-											series={trendCategories.map((category) => ({
-												id: category.id,
-												label: categoryLabel(category.id),
-												data: trendRows.map((row) => row.values[category.id]),
-												valueFormatter: valueFmt,
-												curve: "linear",
-												showMark: true,
-												...(category.id === "norge"
-													? { color: "#9AA2AB" }
-													: {}),
-											}))}
-										/>
-									))}
-								{isDemography && (
-									<LineChart
-										xAxis={[
-											{
-												scaleType: "point",
-												data: demographyRows.map((row) => row.category),
-												valueFormatter: categoryLabel,
-												height: "auto",
-											},
-										]}
-										yAxis={[
-											{
-												min: 0,
-												max: demographyMax > 0 ? demographyMax * 1.01 : 1,
-												width: "auto",
+											series={demographySeries.map((series) => ({
+												...series,
+												data: demographyRows.map(
+													(row) => row.values[series.id],
+												),
+												color:
+													series.id === genders[0]?.id ? "#95BDE6" : "#00509E",
+												showMark: false,
 												valueFormatter: (value: number | null) =>
 													value === null
 														? "-"
 														: formatNumber(
 																value,
 																lang,
-																proportion ? { style: "percent" } : undefined,
+																proportion
+																	? { style: "percent" }
+																	: { maximumFractionDigits: 0 },
 															),
-											},
-										]}
-										series={demographySeries.map((series) => ({
-											...series,
-											data: demographyRows.map((row) => row.values[series.id]),
-											color:
-												series.id === genders[0]?.id ? "#95BDE6" : "#00509E",
-											showMark: false,
-											valueFormatter: (value: number | null) =>
-												value === null
-													? "-"
-													: formatNumber(
-															value,
-															lang,
-															proportion
-																? { style: "percent" }
-																: { maximumFractionDigits: 0 },
-														),
-										}))}
-										hideLegend={!showGenders || genders.length < 2}
-										localeText={{ noData }}
+											}))}
+											hideLegend={!showGenders || genders.length < 2}
+											localeText={{ noData }}
+										/>
+									)}
+									<Box
+										component="img"
+										alt={`${analyse.author} logo`}
+										src={
+											analyse.author === "SKDE"
+												? "/img/logo-skde-graa.svg"
+												: "/img/helse-forde-graa.svg"
+										}
+										sx={{
+											width: "15vw",
+											maxWidth: analyse.author === "SKDE" ? 100 : 150,
+											position: "absolute",
+											bottom: 55,
+											right: 30,
+											pointerEvents: "none",
+										}}
 									/>
-								)}
-								<Box
-									component="img"
-									alt={`${analyse.author} logo`}
-									src={
-										analyse.author === "SKDE"
-											? "/img/logo-skde-graa.svg"
-											: "/img/helse-forde-graa.svg"
-									}
-									sx={{
-										width: "15vw",
-										maxWidth: analyse.author === "SKDE" ? 100 : 150,
-										position: "absolute",
-										bottom: 55,
-										right: 30,
-										pointerEvents: "none",
-									}}
-								/>
-							</Box>
-							<Typography
-								variant="body2"
-								sx={{ textAlign: "center", padding: 2, paddingBottom: 3 }}
-							>
-								{caption}
-							</Typography>
-						</div>
-					</TabPanel>
-				</Paper>
-			</TabContext>
-			<Snackbar
-				open={notification !== undefined}
-				autoHideDuration={4000}
-				onClose={() => setNotification(undefined)}
-				anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-			>
-				<Alert
-					severity={notification?.error ? "error" : "success"}
-					action={
-						<IconButton
-							size="small"
-							color="inherit"
-							aria-label={lang === "en" ? "Close" : "Lukk"}
-							onClick={() => setNotification(undefined)}
-						>
-							<CloseIcon fontSize="small" />
-						</IconButton>
-					}
+								</Box>
+								<Typography
+									variant="body2"
+									sx={{ textAlign: "center", padding: 2, paddingBottom: 3 }}
+								>
+									{caption}
+								</Typography>
+							</div>
+						</TabPanel>
+					</Paper>
+				</TabContext>
+				<Snackbar
+					open={notification !== undefined}
+					autoHideDuration={4000}
+					onClose={() => setNotification(undefined)}
+					anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
 				>
-					{notification?.message}
-				</Alert>
-			</Snackbar>
-		</Box>
+					<Alert
+						severity={notification?.error ? "error" : "success"}
+						action={
+							<IconButton
+								size="small"
+								color="inherit"
+								aria-label={lang === "en" ? "Close" : "Lukk"}
+								onClick={() => setNotification(undefined)}
+							>
+								<CloseIcon fontSize="small" />
+							</IconButton>
+						}
+					>
+						{notification?.message}
+					</Alert>
+				</Snackbar>
+			</Box>
+		</>
 	);
 }

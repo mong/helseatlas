@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
-import { Analyser, Rapporter } from "@/payload-types";
-import { Lang } from "@/types";
+import type { Analyser, Rapporter } from "@/payload-types";
+import type { Lang } from "@/types";
 
 export function formatDate(date: Date | string, lang: Lang) {
 	return new Date(date).toLocaleString({ en: "en-GB", no: "nb-NO" }[lang], {
