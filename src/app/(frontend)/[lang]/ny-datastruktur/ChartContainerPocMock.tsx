@@ -32,6 +32,7 @@ import {
 } from "@mui/material";
 import { snapdom } from "@zumer/snapdom";
 import React, { JSX, PropsWithChildren } from "react";
+import { JSONTree } from "react-json-tree";
 import { AnalyseBarChart } from "@/components/Charts/AnalyseBarChart";
 import AnalyseDemography from "@/components/Charts/AnalyseDemography";
 import { AnalyseLineChart } from "@/components/Charts/AnalyseLineChart";
@@ -44,6 +45,7 @@ import {
 	getVariableText,
 } from "@/lib/helpers";
 import { getAreaName, hospitalStructure, Selection } from "@/lib/selection";
+import { Tag } from "@/payload-types";
 import { Lang } from "@/types";
 
 const BACKGROUND_COLOR = "white";
@@ -107,6 +109,17 @@ type YearSelectorProps = {
 	dict: { [k: string]: { [k: string]: string } };
 	speed: number;
 	className?: string;
+};
+
+const jsonTreeTheme = {
+	extend: "monokai",
+	tree: {
+		width: "40%",
+		height: "100%",
+		margin: 0,
+		overflow: "auto",
+		padding: "20px",
+	},
 };
 
 function YearSelectorDropdown({
@@ -220,7 +233,7 @@ function YearSelectorSlider({
 }
 
 type ScreenshotBoxProps = {
-	analyse: Analyser;
+	analyse: AnalyserPocMock;
 	description: JSX.Element;
 	graphRef: React.RefObject<HTMLDivElement | null>;
 };
@@ -252,7 +265,7 @@ function ScreenshotBox({
 				>
 					<Box
 						component="img"
-						alt={`${analyse.author} logo`}
+						alt={`{analyse.author} logo`}
 						src={
 							analyse.author === "SKDE"
 								? "/img/logo-skde-graa.svg"
@@ -297,6 +310,16 @@ const MyTabList = styled(TabList)({
 export interface AnalyserPocMock {
 	id: number;
 	title: string;
+	publiseringsStatus?: ("published" | "test" | "hidden") | null;
+	publishedAt?: string | null;
+	author: "SKDE" | "Helse Førde";
+	norskType: "nb" | "nn";
+	tags?: (number | Tag)[] | null;
+	slug?: string | null;
+	slugLock?: boolean | null;
+	updatedAt: string;
+	createdAt: string;
+	_status?: ("draft" | "published") | null;
 	data: {
 		name: string;
 		/**
@@ -435,17 +458,21 @@ export function ChartContainerPocMock({
 		[analyse],
 	);
 
-	const viewYears = Object.fromEntries(
-		analyse.data.views.map((v) => {
-			const year_range = v.year_range;
-			return [
-				v.name,
-				Array.from(
-					{ length: year_range[1] - year_range[0] + 1 },
-					(_, i) => year_range[0] + i,
-				),
-			];
-		}),
+	const viewYears = React.useMemo(
+		() =>
+			Object.fromEntries(
+				analyse.data.views.map((v) => {
+					const year_range = v.year_range;
+					return [
+						v.name,
+						Array.from(
+							{ length: year_range[1] - year_range[0] + 1 },
+							(_, i) => year_range[0] + i,
+						),
+					];
+				}),
+			),
+		[analyse.data.views],
 	);
 
 	const [viewName, setViewName] = React.useState("total");
@@ -467,8 +494,11 @@ export function ChartContainerPocMock({
 		new Selection({ region: new Set([]), sykehus: new Set([]) }),
 	);
 
-	const getYears = (viewName: string) =>
-		viewYears[viewName === "demografi" ? "total" : viewName];
+	const getYears = React.useCallback(
+		(viewName: string) =>
+			viewYears[viewName === "demografi" ? "total" : viewName],
+		[viewYears],
+	);
 
 	const kategori = getCategory(analyse.data, nynorsk);
 
@@ -489,9 +519,9 @@ export function ChartContainerPocMock({
 			);
 
 	const demographyAvailable = new Set(
-		getYears("total")
-			.map((year) => Object.keys(analyse.data.data.demografi[year]))
-			.flat(),
+		getYears("total").flatMap((year) =>
+			Object.keys(analyse.data.data.demografi[year]),
+		),
 	).difference(new Set(["population"]));
 
 	const maxValues = React.useMemo(() => {
@@ -565,7 +595,7 @@ export function ChartContainerPocMock({
 				},
 			),
 		);
-	}, [analyse]);
+	}, [analyse, getYears]);
 
 	const varNames = React.useMemo(
 		() =>
@@ -583,6 +613,7 @@ export function ChartContainerPocMock({
 
 	const areaAndAggregationSelect = (
 		<div className="flex flex-wrap gap-4 px-4 sm:px-8 mb-4">
+			Buttons:
 			<div className="w-45 sm:w-55 md:w-62.5">
 				<Dropdown
 					multiple
@@ -740,6 +771,45 @@ export function ChartContainerPocMock({
 
 	return (
 		<Box sx={{ width: "100%", typography: "body1" }}>
+			Debug data objects:
+			<br />
+			<div className="flex gap-4 bg-neutral-200 justify-between mb-8">
+				<JSONTree
+					data={{ demografiVariable, selection, tidstrendVariable }}
+					theme={jsonTreeTheme}
+					invertTheme={false}
+					hideRoot={true}
+				/>
+				<JSONTree
+					data={analyse}
+					theme={jsonTreeTheme}
+					invertTheme={false}
+					hideRoot={true}
+				/>
+			</div>
+			Debug state variables:
+			<div className="flex flex-wrap gap-4 p-10 border bg-neutral-200 mb-8">
+				<div className="font-bold">år:</div>
+				<div>{year || "-"};</div>
+				<div className="font-bold">demografi:</div>
+				<div> {demographyAndel ? "yes" : "no"};</div>
+				<div className="font-bold">show genders:</div>
+				<div> {showGenders ? "yes" : "no"};</div>
+				<div className="font-bold">view:</div>
+				<div>{viewName || "-"};</div>
+				<div className="font-bold">all years:</div>
+				<div>{allYears ? "yes" : "no"};</div>
+				<div className="font-bold">analyse tab:</div>
+				<div>{analyseTab || "-"};</div>
+				<div className="font-bold">main tab:</div>
+				<div>{mainTab || "-"};</div>
+				<div className="font-bold">level:</div>
+				<div>{level || "-"};</div>
+				<div className="font-bold">verdi type:</div>
+				<div>{verdiType || "-"};</div>
+				<div className="font-bold">show Norway:</div>
+				<div>{showNorway ? "yes" : "no"};</div>
+			</div>
 			<TabContext value={mainTab}>
 				<MyTabList
 					onChange={(_, value) => setMainTab(value)}
@@ -757,6 +827,20 @@ export function ChartContainerPocMock({
 						iconPosition="start"
 						label={dict.analysebox.demography}
 						value="demografi"
+						sx={{ textTransform: "none" }}
+					/>
+					<Tab
+						// icon={<GroupsIcon fontSize="small" />}
+						iconPosition="start"
+						label={"behandler (ph)"}
+						value="ph1"
+						sx={{ textTransform: "none" }}
+					/>
+					<Tab
+						// icon={<GroupsIcon fontSize="small" />}
+						iconPosition="start"
+						label={"sektor (ph)"}
+						value="ph2"
 						sx={{ textTransform: "none" }}
 					/>
 				</MyTabList>
@@ -798,6 +882,7 @@ export function ChartContainerPocMock({
 									<div className="flex gap-4">
 										<div className="flex flex-wrap gap-4 gap-y-2 mb-4">
 											<div className="w-45 sm:w-55 md:w-62.5">
+												Fokusområde dropdown (should be tab)
 												<Dropdown
 													removeAll={dict.analysebox.remove_choice}
 													items={{
@@ -852,7 +937,10 @@ export function ChartContainerPocMock({
 										className="hidden sm:block"
 									/>
 								</div>
-								<div>
+								<div className="p-4 border bg-neutral-100 text-center ">
+									Graph goes here
+								</div>
+								{/* <div>
 									<ScreenshotBox
 										graphRef={graphRef}
 										analyse={analyse}
@@ -916,7 +1004,7 @@ export function ChartContainerPocMock({
 											}
 										/>
 									</ScreenshotBox>
-								</div>
+								</div> */}
 							</TabPanel>
 							<TabPanel
 								value="tidstrend"
@@ -1004,6 +1092,7 @@ export function ChartContainerPocMock({
 							</TabPanel>
 						</TabContext>
 					</TabPanel>
+
 					<TabPanel value="demografi" sx={{ paddingX: 0, paddingBottom: 0 }}>
 						<div className="px-4 sm:px-8">
 							<div className="flex gap-4">

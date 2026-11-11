@@ -1,3 +1,4 @@
+"use client";
 import {
 	Accordion,
 	AccordionItem,
@@ -8,15 +9,34 @@ import {
 } from "@mong/material-ui";
 import { Alert, CircularProgress } from "@mui/material";
 import { cache, Suspense } from "react";
-import { AnalyserPocMock } from "@/app/(frontend)/[lang]/ny-datastruktur/ChartContainerPocMock";
+import {
+	type Base16Theme,
+	JSONTree,
+	type StylingConfig,
+} from "react-json-tree";
+import {
+	AnalyserPocMock,
+	ChartContainerPocMock,
+} from "@/app/(frontend)/[lang]/ny-datastruktur/ChartContainerPocMock";
 import { ChartContainer } from "@/components/Charts/ChartContainer";
 import { MaxWidth } from "@/components/MaxWidth";
 import RichText from "@/components/RichText";
 import TagList from "@/components/TagList";
-import { getDictionary } from "@/lib/dictionaries";
-import { getSubHeader, makeDateElem } from "@/lib/helpers";
+import dict from "@/dictionaries/no.json";
+import { Analyser } from "@/payload-types";
 import analyseNew from "./autisme-barn.json";
 import analyseOld from "./autisme-barn-old.json";
+
+const jsonTreeTheme = {
+	extend: "monokai",
+	tree: {
+		width: "40%",
+		height: "100%",
+		margin: 0,
+		overflow: "auto",
+		padding: "20px",
+	},
+};
 
 export default function NyDatastrukturPage() {
 	const { lang, analyseName } = { lang: "nn", analyseName: "autisme-barn" };
@@ -25,7 +45,29 @@ export default function NyDatastrukturPage() {
 	// 	analyse.tags?.filter((tag) => typeof tag === "object" && tag !== null) ||
 	// 	[];
 
-	const dict = getDictionary("nn");
+	const analyseNewFormat: AnalyserPocMock = {
+		id: 1,
+		title: "Autisme barn",
+		author: "SKDE",
+		norskType: "nn",
+		updatedAt: "2024-06-01",
+		createdAt: "2024-01-01",
+		// @ts-expect-error
+		data: analyseNew,
+		// data: analyseOld,
+	};
+	const analyseOrgFormat: Analyser = {
+		id: 1,
+		name: "Autisme barn",
+		author: "SKDE",
+		norskType: "nn",
+		updatedAt: "2024-06-01",
+		createdAt: "2024-01-01",
+		// data: analyseNew,
+		// @ts-expect-error
+		data: analyseOld,
+	};
+	// const dict = getDictionary("nn");
 
 	return (
 		<div className="flex flex-col gap-10 border w-full p-10 grow">
@@ -40,9 +82,21 @@ export default function NyDatastrukturPage() {
 					<pre>{JSON.stringify({ lang, analyseName }, null, 2)}</pre>
 				</AccordionItem>
 				<AccordionItem title="analysedata">
-					<div className="flex">
-						<pre>{JSON.stringify({ analyseNew }, null, 2)}</pre>
-						<pre>{JSON.stringify({ analyseOld }, null, 2)}</pre>
+					<div className="flex gap-8 w-full h-full overflow-auto">
+						<JSONTree
+							data={analyseOld}
+							theme={jsonTreeTheme}
+							invertTheme={false}
+							hideRoot={true}
+						/>
+						<JSONTree
+							data={analyseNew}
+							theme={jsonTreeTheme}
+							invertTheme={false}
+							hideRoot={true}
+						/>
+						{/* <pre>{JSON.stringify({ analyseNew }, null, 2)}</pre> */}
+						{/* <pre>{JSON.stringify({ analyseOld }, null, 2)}</pre> */}
 					</div>
 				</AccordionItem>
 
@@ -91,13 +145,13 @@ export default function NyDatastrukturPage() {
 					>
 						<div className="py-8">
 							<MaxWidth size="medium">
-								{/* <ChartContainer
+								<ChartContainerPocMock
 									key={"hashlotsofdata"} // Providing key to update state when new files are uploaded in preview
-									analyse={analyse}
+									analyse={analyseOrgFormat}
 									lang={"no"}
 									dict={dict}
 									nynorsk={false}
-								/> */}
+								/>
 							</MaxWidth>
 						</div>
 					</Suspense>
