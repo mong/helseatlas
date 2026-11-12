@@ -182,7 +182,6 @@ function DimensionControls({
 		.filter((dimension) => !exclude.includes(dimension.id))
 		.map((dimension) => (
 			<ToggleButtonGroup
-				{...toggleButtonGroupProps}
 				key={dimension.id}
 				value={values[dimension.id]}
 				exclusive
@@ -205,7 +204,6 @@ function DimensionControls({
 }
 
 const filterControlClasses = "w-30";
-const toggleButtonGroupProps = { exclusive: true };
 
 export function ChartContainerPocMock({
 	analyse,
@@ -540,6 +538,15 @@ export function ChartContainerPocMock({
 			? "No data for this selection"
 			: "Ingen data for dette utvalget";
 
+	const getIcon = (viewId: string) => {
+		if (viewId === "total") return <AssessmentIcon fontSize="small" />;
+		if (viewId === "demografi") return <GroupsIcon fontSize="small" />;
+		if (viewId === "behandler") return <DomainAddIcon fontSize="small" />;
+		if (viewId === "analyse") return <BarChartIcon fontSize="small" />;
+		if (viewId === "tidstrend") return <InsightsIcon fontSize="small" />;
+		return <MedicalInformationIcon fontSize="small" />;
+	};
+
 	return (
 		<Box sx={{ width: "100%", typography: "body1" }}>
 			<DebugDatastruktur
@@ -564,17 +571,7 @@ export function ChartContainerPocMock({
 							key={view.id}
 							value={view.id}
 							label={view.id === "total" ? "Analyse" : view.label[lang]}
-							icon={
-								view.id === "total" ? (
-									<AssessmentIcon fontSize="small" />
-								) : view.id === "demografi" ? (
-									<GroupsIcon fontSize="small" />
-								) : view.id === "behandler" ? (
-									<DomainAddIcon fontSize="small" />
-								) : (
-									<MedicalInformationIcon fontSize="small" />
-								)
-							}
+							icon={getIcon(view.id)}
 							iconPosition="start"
 							sx={{ textTransform: "none" }}
 						/>
@@ -615,7 +612,7 @@ export function ChartContainerPocMock({
 										/>
 									</div>
 									<ToggleButtonGroup
-										{...toggleButtonGroupProps}
+										exclusive
 										value={categoryType.id}
 										aria-label={lang === "en" ? "Category type" : "Områdetype"}
 										onChange={(_, value: string | null) => {
@@ -646,7 +643,7 @@ export function ChartContainerPocMock({
 								<>
 									<ToggleButtonGroup
 										value={showGenders}
-										{...toggleButtonGroupProps}
+										exclusive
 										onChange={(_, value: boolean | null) => {
 											if (value !== null) setShowGenders(value);
 										}}
@@ -663,7 +660,7 @@ export function ChartContainerPocMock({
 									</ToggleButtonGroup>
 									<ToggleButtonGroup
 										value={proportion}
-										{...toggleButtonGroupProps}
+										exclusive
 										onChange={(_, value: boolean | null) => {
 											if (value !== null) setProportion(value);
 										}}
@@ -681,7 +678,7 @@ export function ChartContainerPocMock({
 									{variableSelector}
 									<ToggleButtonGroup
 										value={allYears}
-										{...toggleButtonGroupProps}
+										exclusive
 										onChange={(_, value: boolean | null) => {
 											if (value !== null) setAllYears(value);
 										}}
@@ -712,7 +709,7 @@ export function ChartContainerPocMock({
 									aria-label={lang === "en" ? "Chart type" : "Diagramtype"}
 								>
 									<Tab
-										icon={<BarChartIcon fontSize="small" />}
+										icon={getIcon("analyse")}
 										iconPosition="start"
 										id={`${chartId}-enkeltår`}
 										aria-controls={chartId}
@@ -721,7 +718,7 @@ export function ChartContainerPocMock({
 										sx={{ textTransform: "none" }}
 									/>
 									<Tab
-										icon={<InsightsIcon fontSize="small" />}
+										icon={getIcon("tidstrend")}
 										iconPosition="start"
 										id={`${chartId}-tidstrend`}
 										aria-controls={chartId}
@@ -773,8 +770,10 @@ export function ChartContainerPocMock({
 							className="px-0 md:px-8"
 							ref={graphRef}
 							id={chartId}
-							role={isDemography ? undefined : "tabpanel"}
-							// aria-labelledby={isDemography ? undefined : `${chartId}-${analyseTab}`}
+							{...(!isDemography && {
+								role: "tabpanel" as const,
+								"aria-labelledby": `${chartId}-${analyseTab}`,
+							})}
 						>
 							<Box
 								sx={{
