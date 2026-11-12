@@ -551,7 +551,7 @@ export function ChartContainerPocMock({
 
 	return (
 		<>
-			<div className="pt-2 pb-12">
+			<div className="pt-2 pb-12 mt-1">
 				<Accordion
 					keyId="debug-accordion"
 					gap="2"
