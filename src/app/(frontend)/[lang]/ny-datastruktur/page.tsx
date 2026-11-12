@@ -1,14 +1,7 @@
 "use client";
-import {
-	Accordion,
-	AccordionItem,
-	HeroBanner,
-	PageContent,
-	PageLayout,
-} from "@mong/material-ui";
+import { HeroBanner, PageContent, PageLayout } from "@mong/material-ui";
 import { CircularProgress } from "@mui/material";
 import { Suspense } from "react";
-import { JSONTree } from "react-json-tree";
 import {
 	type AnalyserPocMock,
 	ChartContainerPocMock,
@@ -16,18 +9,6 @@ import {
 import { MaxWidth } from "@/components/MaxWidth";
 import dict from "@/dictionaries/no.json";
 import analyseNew from "./autisme-barn-new.json";
-import analyseOld from "./autisme-barn-old.json";
-
-const jsonTreeTheme = {
-	extend: "monokai",
-	tree: {
-		width: "40%",
-		height: "100%",
-		margin: 0,
-		overflow: "auto",
-		padding: "20px",
-	},
-};
 
 export default function NyDatastrukturPage() {
 	const analyseNewFormat: AnalyserPocMock = {
@@ -62,27 +43,6 @@ export default function NyDatastrukturPage() {
 					>
 						<div className="py-8">
 							<MaxWidth size="medium">
-								<Accordion keyId="debug-datastruktur">
-									<AccordionItem title="Orginal datastruktur">
-										<div className="flex gap-8 w-full h-full overflow-auto">
-											<JSONTree
-												data={analyseOld}
-												theme={jsonTreeTheme}
-												invertTheme={false}
-												hideRoot
-											/>
-										</div>
-									</AccordionItem>
-
-									<AccordionItem title="Ny datastruktur">
-										<JSONTree
-											data={analyseNew}
-											theme={jsonTreeTheme}
-											invertTheme={false}
-											hideRoot
-										/>
-									</AccordionItem>
-								</Accordion>
 								<ChartContainerPocMock
 									key={"hashlotsofdata"} // Providing key to update state when new files are uploaded in preview
 									analyse={analyseNewFormat}
