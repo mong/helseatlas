@@ -32,6 +32,7 @@ component has a **State** panel for inspecting the current selection.
 | [page.tsx](./page.tsx) | Loads the example JSON, supplies analysis metadata and language/dictionary props, and displays the comparison page. |
 | [ChartContainerPocMock.tsx](./ChartContainerPocMock.tsx) | Owns selection state, renders controls and charts, and handles exports and notifications. |
 | [GeographicCharts.tsx](./GeographicCharts.tsx) | Calculates and renders geographic bars or time series, including axis limits and missing-data warnings. Only the active chart mode's dataset is prepared. |
+| [DemographyChart.tsx](./DemographyChart.tsx) | Calculates and renders demographic counts or shares, split or combined gender series, across-year axis limits, and missing-data warnings. |
 | [chartData.ts](./chartData.ts) | Defines the new TypeScript types and pure functions for observation lookup and chart datasets. |
 | [chartData.test.mjs](./chartData.test.mjs) | Checks numeric parity with the old fixture and calculation/error-handling behavior. |
 | [autisme-barn-new.json](./autisme-barn-new.json) | Source of truth for the prototype's chart data. |
@@ -112,14 +113,14 @@ from the wrapper title, view/variable labels, selected dimension labels, and yea
 ```text
 page.tsx: example JSON + analysis metadata
   -> ChartContainerPocMock: selected view, category type, dimensions, year
-    -> GeographicCharts: active geographic chart calculations and rendering
+    -> GeographicCharts / DemographyChart: active chart calculations and rendering
       -> chartData: filter observations and calculate chart rows
         -> AnalyseBarChart / MUI LineChart
 ```
 
-Demographic calculations and rendering remain in `ChartContainerPocMock`.
-Selection state, captions, the author logo, and export handling also remain in
-the parent, so switching chart modes or visiting demography preserves selections.
+Selection state, controls, captions, the author logo, and export handling remain
+in `ChartContainerPocMock`. Each chart component is mounted only when its view is
+active, so inactive chart calculations are skipped while selections are preserved.
 
 ### Views, controls, and selection
 

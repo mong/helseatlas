@@ -27,11 +27,9 @@ import {
 	Tabs,
 	Typography,
 } from "@mui/material";
-import { LineChart } from "@mui/x-charts/LineChart";
 import { snapdom } from "@zumer/snapdom";
 import React from "react";
 import DebugDatastruktur from "@/app/(frontend)/[lang]/ny-datastruktur/debug-datastruktur";
-import { formatNumber } from "@/lib/helpers";
 import type { Lang } from "@/types";
 import {
 	DimensionControls,
@@ -42,13 +40,12 @@ import {
 	type AnalysisData,
 	type DimensionValues,
 	getCategoryType,
-	getDemographyRows,
-	getDimension,
 	getDimensionValues,
 	getEnumDimensions,
 	getView,
 	getYears,
 } from "./chartData";
+import { DemographyChart } from "./DemographyChart";
 import { GeographicCharts } from "./GeographicCharts";
 
 export interface AnalyserPocMock {
@@ -175,80 +172,6 @@ export function ChartContainerPocMock({
 		.filter(Boolean)
 		.join(" · ");
 
-	const demographyRows = React.useMemo(
-		() =>
-			!isDemography
-				? []
-				: getDemographyRows(
-						data,
-						view,
-						variable.id,
-						allYears ? years : [year],
-						dimensions,
-						showGenders,
-						proportion,
-					),
-		[
-			data,
-			view,
-			variable.id,
-			allYears,
-			years,
-			year,
-			dimensions,
-			showGenders,
-			proportion,
-			isDemography,
-		],
-	);
-	const demographyMax = React.useMemo(
-		() =>
-			!isDemography
-				? 0
-				: Math.max(
-						0,
-						...years.flatMap((year) =>
-							getDemographyRows(
-								data,
-								view,
-								variable.id,
-								[year],
-								dimensions,
-								showGenders,
-								proportion,
-							).flatMap((row) =>
-								Object.values(row.values).flatMap((value) =>
-									value === null ? [] : [value],
-								),
-							),
-						),
-					),
-		[
-			data,
-			view,
-			variable.id,
-			years,
-			dimensions,
-			showGenders,
-			proportion,
-			isDemography,
-		],
-	);
-	const genders = isDemography
-		? (getDimension(data, "kjonn").values ?? [])
-		: [];
-	const demographySeries = showGenders
-		? genders.map((gender) => ({ id: gender.id, label: gender.label[lang] }))
-		: [
-				{
-					id: "combined",
-					label: lang === "en" ? "Both genders" : "Begge kjønn",
-				},
-			];
-	const hasMissingValues = demographyRows.some((row) =>
-		Object.values(row.values).some((value) => value === null),
-	);
-
 	function toggleCategory(id: string) {
 		if (id === "norge") return;
 		setSelectedCategories((previous) => {
@@ -338,11 +261,6 @@ export function ChartContainerPocMock({
 			}
 		/>
 	);
-	const noData =
-		lang === "en"
-			? "No data for this selection"
-			: "Ingen data for dette utvalget";
-
 	const getIcon = (viewId: string) => {
 		if (viewId === "total") return <AssessmentIcon fontSize="small" />;
 		if (viewId === "demografi") return <GroupsIcon fontSize="small" />;
@@ -583,13 +501,6 @@ export function ChartContainerPocMock({
 								/>
 							</div>
 						)}
-						{hasMissingValues && (
-							<Alert severity="warning" className="mx-4 sm:mx-8">
-								{lang === "en"
-									? "Some observations are missing or have no population denominator; gaps are shown in the chart."
-									: "Noen observasjoner mangler eller har ingen befolkningsnevner; disse vises som hull i diagrammet."}
-							</Alert>
-						)}
 						<div
 							className="px-0 md:px-8"
 							ref={graphRef}
@@ -617,61 +528,21 @@ export function ChartContainerPocMock({
 									{authorLogo}
 								</GeographicCharts>
 							) : (
-								<Box
-									sx={{
-										width: "100%",
-										height: "80vw",
-										maxHeight: 700,
-										minHeight: 370,
-										position: "relative",
-									}}
+								<DemographyChart
+									data={data}
+									view={view}
+									categoryType={categoryType}
+									dimensions={dimensions}
+									years={years}
+									year={year}
+									allYears={allYears}
+									variableId={variable.id}
+									showGenders={showGenders}
+									proportion={proportion}
+									lang={lang}
 								>
-									<LineChart
-										xAxis={[
-											{
-												scaleType: "point",
-												data: demographyRows.map((row) => row.category),
-												valueFormatter: categoryLabel,
-												height: "auto",
-											},
-										]}
-										yAxis={[
-											{
-												min: 0,
-												max: demographyMax > 0 ? demographyMax * 1.01 : 1,
-												width: "auto",
-												valueFormatter: (value: number | null) =>
-													value === null
-														? "-"
-														: formatNumber(
-																value,
-																lang,
-																proportion ? { style: "percent" } : undefined,
-															),
-											},
-										]}
-										series={demographySeries.map((series) => ({
-											...series,
-											data: demographyRows.map((row) => row.values[series.id]),
-											color:
-												series.id === genders[0]?.id ? "#95BDE6" : "#00509E",
-											showMark: false,
-											valueFormatter: (value: number | null) =>
-												value === null
-													? "-"
-													: formatNumber(
-															value,
-															lang,
-															proportion
-																? { style: "percent" }
-																: { maximumFractionDigits: 0 },
-														),
-										}))}
-										hideLegend={!showGenders || genders.length < 2}
-										localeText={{ noData }}
-									/>
 									{authorLogo}
-								</Box>
+								</DemographyChart>
 							)}
 							<Typography
 								variant="body2"
