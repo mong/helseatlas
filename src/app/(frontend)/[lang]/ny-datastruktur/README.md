@@ -30,10 +30,11 @@ component has a **State** panel for inspecting the current selection.
 | File | Responsibility |
 | --- | --- |
 | [page.tsx](./page.tsx) | Loads the example JSON, supplies analysis metadata and language/dictionary props, and displays the comparison page. |
-| [ChartContainerPocMock.tsx](./ChartContainerPocMock.tsx) | Owns selection state, renders controls and charts, and handles exports and notifications. |
+| [ChartContainerPocMock.tsx](./ChartContainerPocMock.tsx) | Owns selection state, renders controls and charts, builds captions/export filenames, and displays export notifications. |
 | [GeographicCharts.tsx](./GeographicCharts.tsx) | Calculates and renders geographic bars or time series, including axis limits and missing-data warnings. Only the active chart mode's dataset is prepared. |
 | [DemographyChart.tsx](./DemographyChart.tsx) | Calculates and renders demographic counts or shares, split or combined gender series, across-year axis limits, and missing-data warnings. |
 | [ChartFrame.tsx](./ChartFrame.tsx) | Shared plot sizing, warning slot, author logo, caption, accessibility attributes, and DOM ref boundary for chart exports. |
+| [useChartExport.ts](./useChartExport.ts) | Owns the export ref, JSON/PNG downloads, clipboard copying, and export notification state. |
 | [chartData.ts](./chartData.ts) | Defines the new TypeScript types and pure functions for observation lookup and chart datasets. |
 | [chartData.test.mjs](./chartData.test.mjs) | Checks numeric parity with the old fixture and calculation/error-handling behavior. |
 | [autisme-barn-new.json](./autisme-barn-new.json) | Source of truth for the prototype's chart data. |
@@ -119,8 +120,10 @@ page.tsx: example JSON + analysis metadata
         -> AnalyseBarChart / MUI LineChart
 ```
 
-Selection state, controls, caption construction, and export handling remain in
-`ChartContainerPocMock`. It passes shared `frameProps` to the active renderer,
+Selection state, controls, caption construction, and export filenames remain in
+`ChartContainerPocMock`. `useChartExport` handles the export operations and
+notification state; the parent renders the download menu and notification UI.
+It passes shared `frameProps` to the active renderer,
 which uses `ChartFrame` to display warnings above the fixed-height plot and
 render the author logo and caption. The export ref encloses the warning, plot,
 logo, and caption, but not the selection controls. Geographic tab-panel IDs and

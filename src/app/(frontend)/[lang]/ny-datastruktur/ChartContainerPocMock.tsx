@@ -26,7 +26,6 @@ import {
 	Tab,
 	Tabs,
 } from "@mui/material";
-import { snapdom } from "@zumer/snapdom";
 import React from "react";
 import DebugDatastruktur from "@/app/(frontend)/[lang]/ny-datastruktur/debug-datastruktur";
 import type { Lang } from "@/types";
@@ -47,6 +46,7 @@ import {
 } from "./chartData";
 import { DemographyChart } from "./DemographyChart";
 import { GeographicCharts } from "./GeographicCharts";
+import { useChartExport } from "./useChartExport";
 
 export interface AnalyserPocMock {
 	id: number;
@@ -100,11 +100,6 @@ export function ChartContainerPocMock({
 	const [proportion, setProportion] = React.useState(false);
 	const [allYears, setAllYears] = React.useState(true);
 	const [selectedYear, setSelectedYear] = React.useState<number>();
-	const [notification, setNotification] = React.useState<{
-		message: string;
-		error: boolean;
-	}>();
-	const graphRef = React.useRef<HTMLDivElement>(null);
 	const chartId = React.useId();
 
 	const view = getView(data, viewId);
@@ -171,6 +166,19 @@ export function ChartContainerPocMock({
 	]
 		.filter(Boolean)
 		.join(" · ");
+	const { graphRef, download, notification, closeNotification } = useChartExport({
+		data,
+		title: analyse.title,
+		imageFilename: `${analyse.title}_${view.id}_${
+			isDemography && allYears
+				? "all_years"
+				: !isDemography && analyseTab === "tidstrend"
+					? "tidstrend"
+					: year
+		}.png`,
+		messages: dict.analysebox,
+		lang,
+	});
 
 	function toggleCategory(id: string) {
 		if (id === "norge") return;
@@ -180,58 +188,6 @@ export function ChartContainerPocMock({
 			else selected.add(id);
 			return { ...previous, [categoryType.id]: [...selected] };
 		});
-	}
-
-	async function download(option: string) {
-		try {
-			if (option === dict.analysebox.download_data) {
-				const url = URL.createObjectURL(
-					new Blob([JSON.stringify(data, null, 2)], {
-						type: "application/json",
-					}),
-				);
-				const link = document.createElement("a");
-				link.href = url;
-				link.download = `${analyse.title}.json`;
-				document.body.appendChild(link);
-				link.click();
-				link.remove();
-				setTimeout(() => URL.revokeObjectURL(url), 0);
-				return;
-			}
-			if (!graphRef.current)
-				throw new Error("The chart is not available for export");
-			if (option === dict.analysebox.copy_graph) {
-				const blob = await snapdom.toBlob(graphRef.current, { type: "png" });
-				if (!blob) throw new Error("Unable to create a chart image");
-				await navigator.clipboard.write([
-					new ClipboardItem({ [blob.type]: blob }),
-				]);
-				setNotification({
-					message: dict.analysebox.copy_graph_snackbar_message,
-					error: false,
-				});
-			} else if (option === dict.analysebox.download_graph) {
-				const result = await snapdom(graphRef.current);
-				await result.download({
-					format: "png",
-					backgroundColor: "white",
-					filename: `${analyse.title}_${view.id}_${
-						isDemography && allYears
-							? "all_years"
-							: !isDemography && analyseTab === "tidstrend"
-								? "tidstrend"
-								: year
-					}.png`,
-				});
-			}
-		} catch (error) {
-			console.error("Chart export failed", error);
-			setNotification({
-				message: `${lang === "en" ? "Export failed" : "Eksport feilet"}: ${error instanceof Error ? error.message : String(error)}`,
-				error: true,
-			});
-		}
 	}
 
 	const downloadButton = (
@@ -530,7 +486,7 @@ export function ChartContainerPocMock({
 			<Snackbar
 				open={notification !== undefined}
 				autoHideDuration={4000}
-				onClose={() => setNotification(undefined)}
+				onClose={closeNotification}
 				anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
 			>
 				<Alert
@@ -540,7 +496,7 @@ export function ChartContainerPocMock({
 							size="small"
 							color="inherit"
 							aria-label={lang === "en" ? "Close" : "Lukk"}
-							onClick={() => setNotification(undefined)}
+							onClick={closeNotification}
 						>
 							<CloseIcon fontSize="small" />
 						</IconButton>
