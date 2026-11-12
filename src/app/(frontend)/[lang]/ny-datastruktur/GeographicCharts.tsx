@@ -1,9 +1,10 @@
-import { Alert, Box } from "@mui/material";
+import { Alert } from "@mui/material";
 import { LineChart } from "@mui/x-charts/LineChart";
 import React from "react";
 import { AnalyseBarChart } from "@/components/Charts/AnalyseBarChart";
 import { formatNumber } from "@/lib/helpers";
 import type { Lang } from "@/types";
+import { ChartFrame, type ChartFrameOptions } from "./ChartFrame";
 import {
 	type AnalysisData,
 	type CategoryType,
@@ -26,7 +27,7 @@ type GeographicChartsProps = {
 	showNorway: boolean;
 	onCategoryClick: (category: string) => void;
 	lang: Lang;
-	children?: React.ReactNode;
+	frameProps: ChartFrameOptions;
 };
 
 export function GeographicCharts({
@@ -42,7 +43,7 @@ export function GeographicCharts({
 	showNorway,
 	onCategoryClick,
 	lang,
-	children,
+	frameProps,
 }: GeographicChartsProps) {
 	const isRate = dimensions.rate_eller_antall === "rate";
 	const categoryLabel = (id: string) => {
@@ -113,85 +114,76 @@ export function GeographicCharts({
 	);
 
 	return (
-		<>
-			{hasMissingValues && (
+		<ChartFrame
+			{...frameProps}
+			warning={hasMissingValues && (
 				<Alert severity="warning" className="mx-4 sm:mx-8">
 					{lang === "en"
 						? "Some observations are missing or have no population denominator; gaps are shown in the chart."
 						: "Noen observasjoner mangler eller har ingen befolkningsnevner; disse vises som hull i diagrammet."}
 				</Alert>
 			)}
-			<Box
-				sx={{
-					width: "100%",
-					height: "80vw",
-					maxHeight: 700,
-					minHeight: 370,
-					position: "relative",
-				}}
-			>
-				{mode === "enkeltår" ? (
-					<AnalyseBarChart
-						categories={barRows
-							.filter((row) => row.category !== "norge" || isRate)
-							.map((row) => row.category)}
-						categoryFmt={categoryLabel}
-						variables={view.variables.map((variable) => variable.id)}
-						variableFmt={(id) => {
-							const variable = view.variables.find(
-								(variable) => variable.id === id,
-							);
-							if (!variable) throw new Error(`Unknown variable: ${id}`);
-							return variable.label[lang];
-						}}
-						valueGetter={(category, variable) => {
-							const row = barRows.find((row) => row.category === category);
-							if (!row) throw new Error(`Missing bar category: ${category}`);
-							return row.values[variable];
-						}}
-						valueAxisFmt={(value) => formatNumber(value, lang)}
-						valueFmt={valueFmt}
-						special_values={new Set(["norge"])}
-						selection={selection}
-						onClick={onCategoryClick}
-						maxValue={barMax > 0 ? barMax * 1.01 : 1}
-					/>
-				) : trendCategories.length === 0 ? (
-					<Alert severity="info">
-						{lang === "en"
-							? "No referral areas selected"
-							: "Ingen opptaksområder valgt"}
-					</Alert>
-				) : (
-					<LineChart
-						xAxis={[
-							{
-								scaleType: "point",
-								data: trendRows.map((row) => row.year),
-								valueFormatter: String,
-								height: "auto",
-							},
-						]}
-						yAxis={[
-							{
-								min: 0,
-								max: trendMax > 0 ? trendMax * 1.01 : 1,
-								width: "auto",
-							},
-						]}
-						series={trendCategories.map((category) => ({
-							id: category.id,
-							label: categoryLabel(category.id),
-							data: trendRows.map((row) => row.values[category.id]),
-							valueFormatter: valueFmt,
-							curve: "linear",
-							showMark: true,
-							...(category.id === "norge" ? { color: "#9AA2AB" } : {}),
-						}))}
-					/>
-				)}
-				{children}
-			</Box>
-		</>
+		>
+			{mode === "enkeltår" ? (
+				<AnalyseBarChart
+					categories={barRows
+						.filter((row) => row.category !== "norge" || isRate)
+						.map((row) => row.category)}
+					categoryFmt={categoryLabel}
+					variables={view.variables.map((variable) => variable.id)}
+					variableFmt={(id) => {
+						const variable = view.variables.find(
+							(variable) => variable.id === id,
+						);
+						if (!variable) throw new Error(`Unknown variable: ${id}`);
+						return variable.label[lang];
+					}}
+					valueGetter={(category, variable) => {
+						const row = barRows.find((row) => row.category === category);
+						if (!row) throw new Error(`Missing bar category: ${category}`);
+						return row.values[variable];
+					}}
+					valueAxisFmt={(value) => formatNumber(value, lang)}
+					valueFmt={valueFmt}
+					special_values={new Set(["norge"])}
+					selection={selection}
+					onClick={onCategoryClick}
+					maxValue={barMax > 0 ? barMax * 1.01 : 1}
+				/>
+			) : trendCategories.length === 0 ? (
+				<Alert severity="info">
+					{lang === "en"
+						? "No referral areas selected"
+						: "Ingen opptaksområder valgt"}
+				</Alert>
+			) : (
+				<LineChart
+					xAxis={[
+						{
+							scaleType: "point",
+							data: trendRows.map((row) => row.year),
+							valueFormatter: String,
+							height: "auto",
+						},
+					]}
+					yAxis={[
+						{
+							min: 0,
+							max: trendMax > 0 ? trendMax * 1.01 : 1,
+							width: "auto",
+						},
+					]}
+					series={trendCategories.map((category) => ({
+						id: category.id,
+						label: categoryLabel(category.id),
+						data: trendRows.map((row) => row.values[category.id]),
+						valueFormatter: valueFmt,
+						curve: "linear",
+						showMark: true,
+						...(category.id === "norge" ? { color: "#9AA2AB" } : {}),
+					}))}
+				/>
+			)}
+		</ChartFrame>
 	);
 }

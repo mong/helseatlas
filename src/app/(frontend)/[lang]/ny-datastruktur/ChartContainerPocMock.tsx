@@ -25,7 +25,6 @@ import {
 	styled,
 	Tab,
 	Tabs,
-	Typography,
 } from "@mui/material";
 import { snapdom } from "@zumer/snapdom";
 import React from "react";
@@ -36,6 +35,7 @@ import {
 	VariableSelector,
 	YearSelector,
 } from "./ChartControls";
+import type { ChartFrameOptions } from "./ChartFrame";
 import {
 	type AnalysisData,
 	type DimensionValues,
@@ -269,25 +269,16 @@ export function ChartContainerPocMock({
 		if (viewId === "tidstrend") return <InsightsIcon fontSize="small" />;
 		return <MedicalInformationIcon fontSize="small" />;
 	};
-	const authorLogo = (
-		<Box
-			component="img"
-			alt={`${analyse.author} logo`}
-			src={
-				analyse.author === "SKDE"
-					? "/img/logo-skde-graa.svg"
-					: "/img/helse-forde-graa.svg"
-			}
-			sx={{
-				width: "15vw",
-				maxWidth: analyse.author === "SKDE" ? 100 : 150,
-				position: "absolute",
-				bottom: 55,
-				right: 30,
-				pointerEvents: "none",
-			}}
-		/>
-	);
+	const frameProps: ChartFrameOptions = {
+		author: analyse.author,
+		caption,
+		graphRef,
+		id: chartId,
+		...(!isDemography && {
+			role: "tabpanel",
+			"aria-labelledby": `${chartId}-${analyseTab}`,
+		}),
+	};
 
 	return (
 		<Box sx={{ width: "100%", typography: "body1" }}>
@@ -501,56 +492,38 @@ export function ChartContainerPocMock({
 								/>
 							</div>
 						)}
-						<div
-							className="px-0 md:px-8"
-							ref={graphRef}
-							id={chartId}
-							{...(!isDemography && {
-								role: "tabpanel" as const,
-								"aria-labelledby": `${chartId}-${analyseTab}`,
-							})}
-						>
-							{!isDemography ? (
-								<GeographicCharts
-									data={data}
-									view={view}
-									categoryType={categoryType}
-									dimensions={dimensions}
-									years={years}
-									year={year}
-									mode={analyseTab}
-									variableId={variable.id}
-									selection={selection}
-									showNorway={showNorway}
-									onCategoryClick={toggleCategory}
-									lang={lang}
-								>
-									{authorLogo}
-								</GeographicCharts>
-							) : (
-								<DemographyChart
-									data={data}
-									view={view}
-									categoryType={categoryType}
-									dimensions={dimensions}
-									years={years}
-									year={year}
-									allYears={allYears}
-									variableId={variable.id}
-									showGenders={showGenders}
-									proportion={proportion}
-									lang={lang}
-								>
-									{authorLogo}
-								</DemographyChart>
-							)}
-							<Typography
-								variant="body2"
-								sx={{ textAlign: "center", padding: 2, paddingBottom: 3 }}
-							>
-								{caption}
-							</Typography>
-						</div>
+						{!isDemography ? (
+							<GeographicCharts
+								data={data}
+								view={view}
+								categoryType={categoryType}
+								dimensions={dimensions}
+								years={years}
+								year={year}
+								mode={analyseTab}
+								variableId={variable.id}
+								selection={selection}
+								showNorway={showNorway}
+								onCategoryClick={toggleCategory}
+								lang={lang}
+								frameProps={frameProps}
+							/>
+						) : (
+							<DemographyChart
+								data={data}
+								view={view}
+								categoryType={categoryType}
+								dimensions={dimensions}
+								years={years}
+								year={year}
+								allYears={allYears}
+								variableId={variable.id}
+								showGenders={showGenders}
+								proportion={proportion}
+								lang={lang}
+								frameProps={frameProps}
+							/>
+						)}
 					</TabPanel>
 				</Paper>
 			</TabContext>

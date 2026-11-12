@@ -1,8 +1,9 @@
-import { Alert, Box } from "@mui/material";
+import { Alert } from "@mui/material";
 import { LineChart } from "@mui/x-charts/LineChart";
 import React from "react";
 import { formatNumber } from "@/lib/helpers";
 import type { Lang } from "@/types";
+import { ChartFrame, type ChartFrameOptions } from "./ChartFrame";
 import {
 	type AnalysisData,
 	type CategoryType,
@@ -24,7 +25,7 @@ type DemographyChartProps = {
 	showGenders: boolean;
 	proportion: boolean;
 	lang: Lang;
-	children?: React.ReactNode;
+	frameProps: ChartFrameOptions;
 };
 
 export function DemographyChart({
@@ -39,7 +40,7 @@ export function DemographyChart({
 	showGenders,
 	proportion,
 	lang,
-	children,
+	frameProps,
 }: DemographyChartProps) {
 	const rows = React.useMemo(
 		() =>
@@ -108,73 +109,64 @@ export function DemographyChart({
 	};
 
 	return (
-		<>
-			{hasMissingValues && (
+		<ChartFrame
+			{...frameProps}
+			warning={hasMissingValues && (
 				<Alert severity="warning" className="mx-4 sm:mx-8">
 					{lang === "en"
 						? "Some observations are missing or have no population denominator; gaps are shown in the chart."
 						: "Noen observasjoner mangler eller har ingen befolkningsnevner; disse vises som hull i diagrammet."}
 				</Alert>
 			)}
-			<Box
-				sx={{
-					width: "100%",
-					height: "80vw",
-					maxHeight: 700,
-					minHeight: 370,
-					position: "relative",
-				}}
-			>
-				<LineChart
-					xAxis={[
-						{
-							scaleType: "point",
-							data: rows.map((row) => row.category),
-							valueFormatter: categoryLabel,
-							height: "auto",
-						},
-					]}
-					yAxis={[
-						{
-							min: 0,
-							max: maxValue > 0 ? maxValue * 1.01 : 1,
-							width: "auto",
-							valueFormatter: (value: number | null) =>
-								value === null
-									? "-"
-									: formatNumber(
-											value,
-											lang,
-											proportion ? { style: "percent" } : undefined,
-										),
-						},
-					]}
-					series={series.map((series) => ({
-						...series,
-						data: rows.map((row) => row.values[series.id]),
-						color: series.id === genders[0]?.id ? "#95BDE6" : "#00509E",
-						showMark: false,
+		>
+			<LineChart
+				xAxis={[
+					{
+						scaleType: "point",
+						data: rows.map((row) => row.category),
+						valueFormatter: categoryLabel,
+						height: "auto",
+					},
+				]}
+				yAxis={[
+					{
+						min: 0,
+						max: maxValue > 0 ? maxValue * 1.01 : 1,
+						width: "auto",
 						valueFormatter: (value: number | null) =>
 							value === null
 								? "-"
 								: formatNumber(
 										value,
 										lang,
-										proportion
-											? { style: "percent" }
-											: { maximumFractionDigits: 0 },
+										proportion ? { style: "percent" } : undefined,
 									),
-					}))}
-					hideLegend={!showGenders || genders.length < 2}
-					localeText={{
-						noData:
-							lang === "en"
-								? "No data for this selection"
-								: "Ingen data for dette utvalget",
-					}}
-				/>
-				{children}
-			</Box>
-		</>
+					},
+				]}
+				series={series.map((series) => ({
+					...series,
+					data: rows.map((row) => row.values[series.id]),
+					color: series.id === genders[0]?.id ? "#95BDE6" : "#00509E",
+					showMark: false,
+					valueFormatter: (value: number | null) =>
+						value === null
+							? "-"
+							: formatNumber(
+									value,
+									lang,
+									proportion
+										? { style: "percent" }
+										: { maximumFractionDigits: 0 },
+								),
+				}))}
+				hideLegend={!showGenders || genders.length < 2}
+				localeText={{
+					noData:
+						lang === "en"
+							? "No data for this selection"
+							: "Ingen data for dette utvalget",
+				}}
+			/>
+		</ChartFrame>
 	);
 }
