@@ -31,6 +31,7 @@ component has a **State** panel for inspecting the current selection.
 | --- | --- |
 | [page.tsx](./page.tsx) | Loads the example JSON, supplies analysis metadata and language/dictionary props, and displays the comparison page. |
 | [ChartContainerPocMock.tsx](./ChartContainerPocMock.tsx) | Owns selection state, renders controls and charts, and handles exports and notifications. |
+| [GeographicCharts.tsx](./GeographicCharts.tsx) | Calculates and renders geographic bars or time series, including axis limits and missing-data warnings. Only the active chart mode's dataset is prepared. |
 | [chartData.ts](./chartData.ts) | Defines the new TypeScript types and pure functions for observation lookup and chart datasets. |
 | [chartData.test.mjs](./chartData.test.mjs) | Checks numeric parity with the old fixture and calculation/error-handling behavior. |
 | [autisme-barn-new.json](./autisme-barn-new.json) | Source of truth for the prototype's chart data. |
@@ -111,9 +112,14 @@ from the wrapper title, view/variable labels, selected dimension labels, and yea
 ```text
 page.tsx: example JSON + analysis metadata
   -> ChartContainerPocMock: selected view, category type, dimensions, year
-    -> chartData: filter observations and calculate chart rows
-      -> AnalyseBarChart / MUI LineChart
+    -> GeographicCharts: active geographic chart calculations and rendering
+      -> chartData: filter observations and calculate chart rows
+        -> AnalyseBarChart / MUI LineChart
 ```
+
+Demographic calculations and rendering remain in `ChartContainerPocMock`.
+Selection state, captions, the author logo, and export handling also remain in
+the parent, so switching chart modes or visiting demography preserves selections.
 
 ### Views, controls, and selection
 
@@ -184,8 +190,9 @@ When adding a geographic view:
 4. Supply every applicable dimension value on each row. Filtering must identify
    at most one observation per view/category/dimension combination.
 5. Supply numeric values for every declared variable. Geographic bar calculations
-   currently require all categories and variables for every observed year and
-   selectable dimension combination, because rows are prepared across years.
+   require all categories and variables for every observed year and selectable
+   dimension combination when single-year mode is rendered, because its rows are
+   prepared across years.
 6. Check tabs, both chart modes, labels, year changes, and exports.
 
 Changing a display label does not require changing its ID. Changing an ID does

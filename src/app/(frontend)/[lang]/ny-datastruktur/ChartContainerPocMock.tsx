@@ -31,7 +31,6 @@ import { LineChart } from "@mui/x-charts/LineChart";
 import { snapdom } from "@zumer/snapdom";
 import React from "react";
 import DebugDatastruktur from "@/app/(frontend)/[lang]/ny-datastruktur/debug-datastruktur";
-import { AnalyseBarChart } from "@/components/Charts/AnalyseBarChart";
 import { formatNumber } from "@/lib/helpers";
 import type { Lang } from "@/types";
 import {
@@ -42,16 +41,15 @@ import {
 import {
 	type AnalysisData,
 	type DimensionValues,
-	getBarRows,
 	getCategoryType,
 	getDemographyRows,
 	getDimension,
 	getDimensionValues,
 	getEnumDimensions,
-	getTrendRows,
 	getView,
 	getYears,
 } from "./chartData";
+import { GeographicCharts } from "./GeographicCharts";
 
 export interface AnalyserPocMock {
 	id: number;
@@ -146,17 +144,6 @@ export function ChartContainerPocMock({
 		variables[0];
 	const selection = new Set(selectedCategories[categoryType.id] ?? []);
 	const isRate = dimensions.rate_eller_antall === "rate";
-	const valueFmt = (value: number | null) =>
-		value === null
-			? "-"
-			: formatNumber(
-					value,
-					lang,
-					dimensions.rate_eller_antall === "antall" &&
-						dimensions.pasienter_eller_kontaktdager === "pasienter"
-						? { maximumFractionDigits: 0 }
-						: undefined,
-				);
 	const categoryLabel = (id: string) => {
 		const category = categoryType.categories.find(
 			(category) => category.id === id,
@@ -188,50 +175,6 @@ export function ChartContainerPocMock({
 		.filter(Boolean)
 		.join(" · ");
 
-	const barRowsByYear = React.useMemo(
-		() =>
-			isDemography
-				? []
-				: years.map((year) => ({
-						year,
-						rows: getBarRows(data, view, categoryType.id, {
-							...dimensions,
-							year,
-						}),
-					})),
-		[data, view, categoryType.id, dimensions, years, isDemography],
-	);
-	const barRows =
-		barRowsByYear.find((entry) => entry.year === year)?.rows ?? [];
-	const barMax = Math.max(
-		0,
-		...barRowsByYear.flatMap((entry) =>
-			entry.rows
-				.filter((row) => row.category !== "norge")
-				.map((row) => row.sum),
-		),
-	);
-	const trendRows = React.useMemo(
-		() =>
-			isDemography
-				? []
-				: getTrendRows(data, view, categoryType.id, variable.id, dimensions),
-		[data, view, categoryType.id, variable.id, dimensions, isDemography],
-	);
-	const trendCategories = categoryType.categories.filter((category) =>
-		category.id === "norge" ? isRate || showNorway : selection.has(category.id),
-	);
-	const trendMax = Math.max(
-		0,
-		...trendRows.flatMap((row) =>
-			categoryType.categories
-				.filter((category) => category.id !== "norge" || isRate || showNorway)
-				.flatMap((category) => {
-					const value = row.values[category.id];
-					return value === null ? [] : [value];
-				}),
-		),
-	);
 	const demographyRows = React.useMemo(
 		() =>
 			!isDemography
@@ -302,14 +245,9 @@ export function ChartContainerPocMock({
 					label: lang === "en" ? "Both genders" : "Begge kjønn",
 				},
 			];
-	const hasMissingValues = isDemography
-		? demographyRows.some((row) =>
-				Object.values(row.values).some((value) => value === null),
-			)
-		: analyseTab === "tidstrend" &&
-			trendRows.some((row) =>
-				trendCategories.some((category) => row.values[category.id] === null),
-			);
+	const hasMissingValues = demographyRows.some((row) =>
+		Object.values(row.values).some((value) => value === null),
+	);
 
 	function toggleCategory(id: string) {
 		if (id === "norge") return;
@@ -413,6 +351,25 @@ export function ChartContainerPocMock({
 		if (viewId === "tidstrend") return <InsightsIcon fontSize="small" />;
 		return <MedicalInformationIcon fontSize="small" />;
 	};
+	const authorLogo = (
+		<Box
+			component="img"
+			alt={`${analyse.author} logo`}
+			src={
+				analyse.author === "SKDE"
+					? "/img/logo-skde-graa.svg"
+					: "/img/helse-forde-graa.svg"
+			}
+			sx={{
+				width: "15vw",
+				maxWidth: analyse.author === "SKDE" ? 100 : 150,
+				position: "absolute",
+				bottom: 55,
+				right: 30,
+				pointerEvents: "none",
+			}}
+		/>
+	);
 
 	return (
 		<Box sx={{ width: "100%", typography: "body1" }}>
@@ -642,84 +599,33 @@ export function ChartContainerPocMock({
 								"aria-labelledby": `${chartId}-${analyseTab}`,
 							})}
 						>
-							<Box
-								sx={{
-									width: "100%",
-									height: "80vw",
-									maxHeight: 700,
-									minHeight: 370,
-									position: "relative",
-								}}
-							>
-								{!isDemography && analyseTab === "enkeltår" && (
-									<AnalyseBarChart
-										categories={barRows
-											.filter((row) => row.category !== "norge" || isRate)
-											.map((row) => row.category)}
-										categoryFmt={categoryLabel}
-										variables={view.variables.map((variable) => variable.id)}
-										variableFmt={(id) => {
-											const variable = view.variables.find(
-												(variable) => variable.id === id,
-											);
-											if (!variable) throw new Error(`Unknown variable: ${id}`);
-											return variable.label[lang];
-										}}
-										valueGetter={(category, variable) => {
-											const row = barRows.find(
-												(row) => row.category === category,
-											);
-											if (!row)
-												throw new Error(`Missing bar category: ${category}`);
-											return row.values[variable];
-										}}
-										valueAxisFmt={(value) => formatNumber(value, lang)}
-										valueFmt={valueFmt}
-										special_values={new Set(["norge"])}
-										selection={selection}
-										onClick={toggleCategory}
-										maxValue={barMax > 0 ? barMax * 1.01 : 1}
-									/>
-								)}
-								{!isDemography &&
-									analyseTab === "tidstrend" &&
-									(trendCategories.length === 0 ? (
-										<Alert severity="info">
-											{lang === "en"
-												? "No referral areas selected"
-												: "Ingen opptaksområder valgt"}
-										</Alert>
-									) : (
-										<LineChart
-											xAxis={[
-												{
-													scaleType: "point",
-													data: trendRows.map((row) => row.year),
-													valueFormatter: String,
-													height: "auto",
-												},
-											]}
-											yAxis={[
-												{
-													min: 0,
-													max: trendMax > 0 ? trendMax * 1.01 : 1,
-													width: "auto",
-												},
-											]}
-											series={trendCategories.map((category) => ({
-												id: category.id,
-												label: categoryLabel(category.id),
-												data: trendRows.map((row) => row.values[category.id]),
-												valueFormatter: valueFmt,
-												curve: "linear",
-												showMark: true,
-												...(category.id === "norge"
-													? { color: "#9AA2AB" }
-													: {}),
-											}))}
-										/>
-									))}
-								{isDemography && (
+							{!isDemography ? (
+								<GeographicCharts
+									data={data}
+									view={view}
+									categoryType={categoryType}
+									dimensions={dimensions}
+									years={years}
+									year={year}
+									mode={analyseTab}
+									variableId={variable.id}
+									selection={selection}
+									showNorway={showNorway}
+									onCategoryClick={toggleCategory}
+									lang={lang}
+								>
+									{authorLogo}
+								</GeographicCharts>
+							) : (
+								<Box
+									sx={{
+										width: "100%",
+										height: "80vw",
+										maxHeight: 700,
+										minHeight: 370,
+										position: "relative",
+									}}
+								>
 									<LineChart
 										xAxis={[
 											{
@@ -764,25 +670,9 @@ export function ChartContainerPocMock({
 										hideLegend={!showGenders || genders.length < 2}
 										localeText={{ noData }}
 									/>
-								)}
-								<Box
-									component="img"
-									alt={`${analyse.author} logo`}
-									src={
-										analyse.author === "SKDE"
-											? "/img/logo-skde-graa.svg"
-											: "/img/helse-forde-graa.svg"
-									}
-									sx={{
-										width: "15vw",
-										maxWidth: analyse.author === "SKDE" ? 100 : 150,
-										position: "absolute",
-										bottom: 55,
-										right: 30,
-										pointerEvents: "none",
-									}}
-								/>
-							</Box>
+									{authorLogo}
+								</Box>
+							)}
 							<Typography
 								variant="body2"
 								sx={{ textAlign: "center", padding: 2, paddingBottom: 3 }}
