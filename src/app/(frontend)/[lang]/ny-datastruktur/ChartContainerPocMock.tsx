@@ -11,8 +11,6 @@ import DomainAddIcon from "@mui/icons-material/DomainAdd";
 import GroupsIcon from "@mui/icons-material/Groups";
 import InsightsIcon from "@mui/icons-material/InsightsOutlined";
 import MedicalInformationIcon from "@mui/icons-material/MedicalInformation";
-import PauseIcon from "@mui/icons-material/Pause";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
@@ -22,9 +20,7 @@ import {
 	FormControlLabel,
 	IconButton,
 	Paper,
-	Slider,
 	Snackbar,
-	Stack,
 	Switch,
 	styled,
 	Tab,
@@ -39,6 +35,11 @@ import { AnalyseBarChart } from "@/components/Charts/AnalyseBarChart";
 import { formatNumber } from "@/lib/helpers";
 import type { Lang } from "@/types";
 import {
+	DimensionControls,
+	VariableSelector,
+	YearSelector,
+} from "./ChartControls";
+import {
 	type AnalysisData,
 	type DimensionValues,
 	getBarRows,
@@ -50,7 +51,6 @@ import {
 	getTrendRows,
 	getView,
 	getYears,
-	type View,
 } from "./chartData";
 
 export interface AnalyserPocMock {
@@ -70,7 +70,7 @@ export type ChartContainerPocMockProps = {
 	nynorsk?: boolean;
 };
 
-const MyTabList = styled(TabList)({
+const ViewTabList = styled(TabList)({
 	"& .Mui-selected": { background: "white" },
 	"& .MuiButtonBase-root": {
 		minHeight: "unset",
@@ -78,130 +78,6 @@ const MyTabList = styled(TabList)({
 		borderRadius: "8px 8px 0px 0px",
 	},
 });
-
-type YearSelectorProps = {
-	years: number[];
-	year: number;
-	setYear: (year: number) => void;
-	dict: ChartContainerPocMockProps["dict"];
-	lang: Lang;
-};
-
-function YearSelector({ years, year, setYear, dict, lang }: YearSelectorProps) {
-	const [animating, setAnimating] = React.useState(false);
-	const lastYear = years[years.length - 1];
-	React.useEffect(() => {
-		if (!animating) return;
-		const timer = setTimeout(() => {
-			const index = years.indexOf(year);
-			if (index === years.length - 1) setAnimating(false);
-			else setYear(years[index + 1]);
-		}, 600);
-		return () => clearTimeout(timer);
-	}, [animating, year, years, setYear]);
-
-	return (
-		<>
-			<div className="block sm:hidden w-45 mb-4">
-				<Dropdown
-					items={{
-						groups: [
-							{
-								items: years.toReversed().map((year) => ({
-									label: String(year),
-									value: String(year),
-								})),
-							},
-						],
-					}}
-					onChange={(event) => setYear(Number(event.target.value))}
-					placeholder={dict.analysebox.choose_year}
-					value={String(year)}
-				/>
-			</div>
-			<div className="hidden sm:block">
-				<Stack direction="row">
-					<IconButton
-						aria-label={
-							animating ? "Pause" : lang === "en" ? "Play" : "Spill av"
-						}
-						onClick={() => {
-							if (!animating && year === lastYear) setYear(years[0]);
-							setAnimating(!animating);
-						}}
-						disabled={years.length < 2}
-					>
-						{animating ? <PauseIcon /> : <PlayArrowIcon />}
-					</IconButton>
-					<Box sx={{ flexGrow: 1, marginX: 2, marginRight: 4 }}>
-						<Slider
-							track={false}
-							value={year}
-							min={years[0]}
-							max={lastYear}
-							step={null}
-							marks={years.map((year) => ({
-								value: year,
-								label: String(year),
-							}))}
-							onChange={(_, value) => {
-								if (typeof value === "number") setYear(value);
-							}}
-							valueLabelDisplay="auto"
-							aria-label={dict.analysebox.choose_year}
-							disabled={years.length < 2}
-							sx={{
-								"@media (max-width: 600px)": {
-									"& .MuiSlider-markLabel": { fontSize: "0.75rem" },
-								},
-							}}
-						/>
-					</Box>
-				</Stack>
-			</div>
-		</>
-	);
-}
-
-function DimensionControls({
-	data,
-	view,
-	values,
-	onChange,
-	lang,
-	exclude = [],
-}: {
-	data: AnalysisData;
-	view: View;
-	values: DimensionValues;
-	onChange: (values: DimensionValues) => void;
-	lang: Lang;
-	exclude?: string[];
-}) {
-	return getEnumDimensions(data, view)
-		.filter((dimension) => !exclude.includes(dimension.id))
-		.map((dimension) => (
-			<ToggleButtonGroup
-				key={dimension.id}
-				value={values[dimension.id]}
-				exclusive
-				aria-label={dimension.label?.[lang] ?? dimension.id}
-				onChange={(_, value: string | null) => {
-					if (value !== null) onChange({ ...values, [dimension.id]: value });
-				}}
-			>
-				{dimension.values?.map((value) => (
-					<ToggleButton
-						key={value.id}
-						value={value.id}
-						className={filterControlClasses}
-					>
-						{value.label[lang]}
-					</ToggleButton>
-				))}
-			</ToggleButtonGroup>
-		));
-}
 
 const filterControlClasses = "w-30";
 
@@ -509,29 +385,20 @@ export function ChartContainerPocMock({
 			steps="one-step"
 		/>
 	);
+
 	const variableSelector = (
-		<div className="w-45 sm:w-55 md:w-62.5">
-			<Dropdown
-				items={{
-					groups: [
-						{
-							items: variables.map((variable) => ({
-								label: variable.label[lang],
-								value: variable.id,
-							})),
-						},
-					],
-				}}
-				placeholder={dict.analysebox.choose_variable}
-				value={variable.id}
-				onChange={(event) =>
-					setVariableSelection((previous) => ({
-						...previous,
-						[view.id]: String(event.target.value),
-					}))
-				}
-			/>
-		</div>
+		<VariableSelector
+			lang={lang}
+			variables={variables}
+			placeholder={dict.analysebox.choose_variable}
+			value={variable.id}
+			onChange={(event) =>
+				setVariableSelection((previous) => ({
+					...previous,
+					[view.id]: String(event.target.value),
+				}))
+			}
+		/>
 	);
 	const noData =
 		lang === "en"
@@ -560,7 +427,7 @@ export function ChartContainerPocMock({
 				}}
 			/>
 			<TabContext value={viewId}>
-				<MyTabList
+				<ViewTabList
 					onChange={(_, value: string) => setViewId(value)}
 					aria-label={lang === "en" ? "Data view" : "Datavisning"}
 					variant="scrollable"
@@ -576,7 +443,7 @@ export function ChartContainerPocMock({
 							sx={{ textTransform: "none" }}
 						/>
 					))}
-				</MyTabList>
+				</ViewTabList>
 				<Paper
 					sx={{ background: "white", borderRadius: "0px 0px 8px 8px" }}
 					elevation={2}
