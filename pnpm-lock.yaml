@@ -265,7 +265,7 @@ importers:
         version: 4.0.0(@react-spring/web@10.1.2(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@zumer/snapdom':
         specifier: ^3.1.1
-        version: 3.7.1
+        version: 3.7.5
       d3-array:
         specifier: 3.2.5
         version: 3.2.5
@@ -2648,8 +2648,8 @@ packages:
       '@types/react-dom':
         optional: true
 
-  '@zumer/snapdom@3.7.1':
-    resolution: {integrity: sha512-AElxtIKtSXX4G69MS1t/mwKI0Sfzcnm8D7A/mDqWWi96pL0JuPPBNJe9g5WzD/CcCa272lFB6NNhCIfIb2iaaQ==}
+  '@zumer/snapdom@3.7.5':
+    resolution: {integrity: sha512-KXf6tQc286F8ece8ENKwQgZA6mHx0os2iW5GyktXCx6Eu+xf7WJuwJspItuGoOFKydh/ojP92LapmCIiGumHbg==}
 
   accepts@2.0.0:
     resolution: {integrity: sha512-5cvg6CtKwfgdmVqY1WIiXKc3Q1bkRqGLi+2W/6ao+6Y7gu/RCwRuAhGEzh5B4KlszSuTLgZYuqFqo5bImjNKng==}
@@ -7544,7 +7544,7 @@ snapshots:
       '@types/react': 19.3.0
       '@types/react-dom': 19.3.0(@types/react@19.3.0)
 
-  '@zumer/snapdom@3.7.1': {}
+  '@zumer/snapdom@3.7.5': {}
 
   accepts@2.0.0:
     dependencies:
