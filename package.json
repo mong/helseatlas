@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "dotenv -o -e .env.local-db -- next dev",
     "dev:production-db": "dotenv -o -e .env.production-db -- next dev",
-    "seed:local-db": "SEED_LOCAL_DOCKER_DB=1 dotenv -o -e .env.local-db -- payload run scripts/seed-local-db.ts",
+    "seed:local-db": "NODE_ENV=development SEED_LOCAL_DOCKER_DB=1 dotenv -o -e .env.local-db -- payload run scripts/seed-local-db.ts",
+    "clear:local-db": "docker compose -f compose.yaml exec -T db psql -U postgres -d helseatlas -v ON_ERROR_STOP=1 -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public AUTHORIZATION pg_database_owner;'",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",

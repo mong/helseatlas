@@ -4,6 +4,8 @@ import React, { cache } from "react";
 import RichText from "@/components/RichText";
 
 import { ResultBox } from ".";
+import { getServerSideURL } from "@/utilities/getURL";
+import { useAzureStorage } from "@/utilities/storageMode";
 
 const getMap = cache(async (path: string) =>
   fetch(path, { cache: "force-cache", next: { tags: ["datafil"] } }).then((res) => res.json())
@@ -25,12 +27,20 @@ export const ResultBoxBlock: React.FC<ResultBoxBlockProps & { lang?: "en" | "nb"
     return;
   if (!kart || !(typeof kart === "object") || !kart.filename) return;
 
-  const url = "https://payloadfiles.blob.core.windows.net/payloadcms";
+  // Builds must fetch directly from Azure without requiring a running Payload server.
+  const azureURL = "https://payloadfiles.blob.core.windows.net/payloadcms";
+  const mapURL = useAzureStorage
+    ? `${azureURL}/${kart.filename}`
+    : kart.url && new URL(kart.url, getServerSideURL()).href;
+  if (!mapURL) return;
+  const dataURL = useAzureStorage
+    ? `${azureURL}/${media.filename}`
+    : new URL(media.url, getServerSideURL()).href;
 
   // Promise.all to read both files concurrently
   const [mapData, data] = await Promise.all([
-    getMap(`${url}/${kart.filename}`),
-    fetch(`${url}/${media.filename}`, { cache: "force-cache", next: { tags: ["datafil"] } }).then((res) => res.json()),
+    getMap(mapURL),
+    fetch(dataURL, { cache: "force-cache", next: { tags: ["datafil"] } }).then((res) => res.json()),
   ]);
 
 
