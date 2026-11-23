@@ -31,7 +31,44 @@ Hvis man har lyst på litt eksempel-data i den lokale databasen kan man kjøre d
 pnpm seed:local-db
 ```
 
+Kommandoen beholder eksempel-fagområdene og importerer de norske versjonene av
+«Helseatlas barn», «Helseatlas radiologi første del, MR» og «Rusbehandling for vaksne»
+fra det offentlige Payload-API-et. Rapportenes riktekst, tagger,
+bilder, diagramdata, kart og lenkede PDF-er kopieres til lokal database og lokal
+fillagring. SVG-bilder rasteriseres til PNG for å unngå import av kjørbart
+SVG-innhold. Bildestørrelser genereres lokalt, og produksjons-ID-er erstattes med
+lokale ID-er. Internett er nødvendig under importen, men ikke for å vise de
+importerte ressursene etterpå.
+
+Med Azure Storage aktivert hentes diagramdata og kart fortsatt direkte fra Azure,
+slik at produksjonsbygg ikke er avhengige av en kjørende Payload-server.
+
+Rapportene finnes deretter under `/no/rapporter/barn2025`,
+`/no/rapporter/radiologi` og `/no/rapporter/rus` på http://localhost:3000.
+Vanlige rapportadresser som skal importeres, ligger i `reportURLs` i
+[`scripts/seed-local-db.ts`](./scripts/seed-local-db.ts). Rapportene slås opp etter
+slug via API-et, uten å være avhengige av produksjons-ID-er. Oppslaget må gi
+nøyaktig én rapport. Eksisterende rapporter
+(samme slug), tagger og opplastinger gjenbrukes, så kommandoen kan kjøres igjen
+etter en avbrutt import. Eksisterende rapportinnhold oppdateres ikke.
+Kun norsk innhold importeres. Lenker til andre rapporter peker fortsatt til
+produksjon; disse rapportene og eksterne nettsider kopieres ikke. Importen stopper
+med feil ved utilgjengelige ressurser eller relasjonstyper som ikke støttes,
+inkludert rapporter med `relatedRapporter`.
+
 Så kan du kjøre appen med `pnpm dev`.
+
+For å tømme den lokale Docker-databasen, stopp først appen og kjør:
+
+```bash
+pnpm clear:local-db
+```
+
+Docker-tjenesten `db` må kjøre. Kommandoen sletter hele `public`-skjemaet og
+oppretter det på nytt. Alle lokale data slettes, inkludert brukere og innhold som
+ikke ble opprettet av seed-kommandoen. Produksjonsdatabasen berøres ikke.
+Lokale filer i `media/` og `datafiler/` beholdes. Payload oppretter tabellene
+igjen neste gang du kjører `pnpm dev` eller `pnpm seed:local-db`.
 
 
 Hvis du med vil utvikle mot produksjonsdatabasen og Azure Storage, så må du opprette `.env.production-db` med disse verdiene:
