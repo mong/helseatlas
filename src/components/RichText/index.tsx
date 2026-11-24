@@ -69,6 +69,11 @@ export const headerNodeToPlaintext: (node: SerializedHeadingNode) => string = (n
     }
   });
 
+/* Used to find nearest header as a string to group ul, block and paragraph to it */
+const findParentHeadingString = (parent: any, childIndex: number) => {
+  const h = findParentHeading(parent.children, "h6", childIndex - 1);
+  return h ? sanitizeID(headerNodeToPlaintext(h)) : undefined;
+};
 
 const jsxConverters: (lang: "en" | "nb" | "nn", author: "SKDE" | "Helse Førde") =>
   JSXConvertersFunction<NodeTypes> = (lang, author) => ({
@@ -88,6 +93,57 @@ const jsxConverters: (lang: "en" | "nb" | "nn", author: "SKDE" | "Helse Førde")
         const Tag = node.tag;
         return <div className="not-prose"><Tag id={full_id}>{text}</Tag></div>;
       },
+      /* paragraph, list and blocks ensures that these objects acts as
+       * children to the nearest h2. This allows us to point the observer
+       * to an entire paragraph. See useIntersectionByID() in ListItem.tsx */
+      paragraph: ({ node, childIndex, nodesToJSX, parent }) => {
+        const isEmpty = !headerNodeToPlaintext(node as any).trim();
+        return (
+          <p data-section={isEmpty ? undefined : findParentHeadingString(parent, childIndex)}>
+            {nodesToJSX({ nodes: node.children })}
+          </p>
+        );
+      },
+      list: (props) => (
+        <div data-section={findParentHeadingString(props.parent, props.childIndex)}>
+          {(defaultConverters.list as any)(props)}
+        </div>
+      ),
+      /* Stuff that isn't plaintext goes as blocks */
+      blocks: {
+        resultBox: ({ node, childIndex, parent }: { node: SerializedBlockNode<ResultBoxBlockProps>, childIndex: number, parent: any }) => {
+          const parentHeading: SerializedHeadingNode | null = findParentHeading(parent.children, "h6", childIndex - 1);
+          const id = sanitizeID(node.fields.blockName);
+          const full_id = parentHeading ? `${sanitizeID(headerNodeToPlaintext(parentHeading))}_${id}` : id;
+          return (
+            <div id={full_id} data-section={findParentHeadingString(parent, childIndex)}>   {/* only change */}
+              <Suspense fallback={<div className="my-32 justify-center flex"><CircularProgress /></div>}>
+                <ResultBoxBlock lang={lang} author={author} {...node.fields} />
+              </Suspense>
+            </div>
+          )
+        },
+        factBox: ({ node, childIndex, parent }: { node: SerializedBlockNode<FactBoxBlockProps>, childIndex: number, parent: any }) => (
+          <div data-section={findParentHeadingString(parent, childIndex)}>
+            <FactBoxBlock {...node.fields} />
+          </div>
+        ),
+        table: ({ node, childIndex, parent }: { node: SerializedBlockNode<TableBlockProps>, childIndex: number, parent: any }) => (
+          <div data-section={findParentHeadingString(parent, childIndex)}>
+            <TableBlock {...node.fields} />
+          </div>
+        ),
+        rawHTML: ({ node, childIndex, parent }: { node: SerializedBlockNode<RawHTMLBlockProps>, childIndex: number, parent: any }) => (
+          <div data-section={findParentHeadingString(parent, childIndex)}>
+            <RawHTMLBlock {...node.fields} />
+          </div>
+        ),
+        mediaBlock: ({ node, childIndex, parent }: { node: SerializedBlockNode<MediaBlockProps>, childIndex: number, parent: any }) => (
+          <div data-section={findParentHeadingString(parent, childIndex)}>
+            <MediaBlock {...node.fields} />
+          </div>
+        ),
+      },
       table: (props) => {
         const { node, nodesToJSX } = props;
         const content = nodesToJSX({ nodes: node.children })
@@ -98,24 +154,6 @@ const jsxConverters: (lang: "en" | "nb" | "nn", author: "SKDE" | "Helse Førde")
             </tbody>
           </table>
         )
-      },
-      blocks: {
-        resultBox: ({ node, childIndex, parent }: { node: SerializedBlockNode<ResultBoxBlockProps>, childIndex: number, parent: any }) => {
-          const parentHeading: SerializedHeadingNode | null = findParentHeading(parent.children, "h6", childIndex - 1);
-          const id = sanitizeID(node.fields.blockName);
-          const full_id = parentHeading ? `${sanitizeID(headerNodeToPlaintext(parentHeading))}_${id}` : id;
-          return (
-            <div id={full_id}>
-              <Suspense fallback={<div className="my-32 justify-center flex"><CircularProgress /></div>}>
-                <ResultBoxBlock lang={lang} author={author} {...node.fields} />
-              </Suspense>
-            </div>
-          )
-        },
-        factBox: ({ node }: { node: SerializedBlockNode<FactBoxBlockProps> }) => <FactBoxBlock {...node.fields} />,
-        table: ({ node }: { node: SerializedBlockNode<TableBlockProps> }) => <TableBlock {...node.fields} />,
-        rawHTML: ({ node }: { node: SerializedBlockNode<RawHTMLBlockProps> }) => <RawHTMLBlock {...node.fields} />,
-        mediaBlock: ({ node }: { node: SerializedBlockNode<MediaBlockProps> }) => <MediaBlock {...node.fields} />,
       },
     })
   };
