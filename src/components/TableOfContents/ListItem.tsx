@@ -17,21 +17,33 @@ const useIntersectionByID = (elementID: string, rootMargin: string) => {
 
   useEffect(() => {
     const element = document.getElementById(elementID);
-    if (!element) {
-      return;
-    }
+    if (!element) return;
+
+    /* In addition to observing the main element (the h2),
+     * we also observe its children. We group these together
+     * in `inView` to set the visibility for all of them.
+     * This gives the effect of watching an entire section,
+     * as each child contributes to the visiblity of the 
+     * h2 which makes it appear bold in the ToC. */
+    const inView = new Set<Element>();
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        setVisibility(entry.isIntersecting);
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) inView.add(entry.target);
+          else inView.delete(entry.target);
+        }
+        setVisibility(inView.size > 0);
       },
-      { rootMargin, threshold: 0.1 },
+      { rootMargin, threshold: 0 },
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    element && observer.observe(element);
+    observer.observe(element);
+    document
+      .querySelectorAll(`[data-section="${elementID}"]`)
+      .forEach((elem) => observer.observe(elem));
 
-    return () => observer.unobserve(element);
-  }, [isVisible]);
+    return () => observer.disconnect();
+  }, [elementID, rootMargin]);
 
   return isVisible;
 };
@@ -65,7 +77,10 @@ export const ListItem = ({
   expanded,
   setExpanded,
 }: ListItemProps) => {
-  const isVisbile = useIntersectionByID(href.replace("#", ""), "0px");
+  /* Setting -20% makes only the bottom 80% count. As in when scrolling to
+   * a new section. The old section will no longer be in focus (not bold in ToC)
+   * when it has passed 80% of the screen from bottom-up. */
+  const isVisbile = useIntersectionByID(href.replace("#", ""), "-20% 0px 0px 0px");
 
   return (
     <li
